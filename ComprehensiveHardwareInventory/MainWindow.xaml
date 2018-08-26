@@ -1,0 +1,87 @@
+﻿<Window x:Class="ComprehensiveHardwareInventory.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ComprehensiveHardwareInventory"
+        mc:Ignorable="d"
+    Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Menu>
+            <MenuItem Header="File">
+                <MenuItem Header="New"></MenuItem>
+                <MenuItem Header="Open"></MenuItem>
+                <MenuItem Header="Save"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="Edit">
+                <MenuItem Header="Undo"></MenuItem>
+                <MenuItem Header="Redo"></MenuItem>
+                <Separator></Separator>
+                <MenuItem Header="Cut"></MenuItem>
+                <MenuItem Header="Copy"></MenuItem>
+                <MenuItem Header="Paste"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="View">
+                <MenuItem Header="Hierachy">
+                    <MenuItem Header="System">
+                        <MenuItem Header="A"></MenuItem>
+                        <MenuItem Header="B"></MenuItem>
+                        <MenuItem Header="C"></MenuItem>
+                        <MenuItem Header="D"></MenuItem>
+                        <MenuItem Header="E"></MenuItem>
+                        <MenuItem Header="F"></MenuItem>
+                        <MenuItem Header="G"></MenuItem>
+                        <MenuItem Header="H"></MenuItem>
+                        <MenuItem Header="I"></MenuItem>
+                        <MenuItem Header="J"></MenuItem>
+                    </MenuItem>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="PowerEdit">
+                <MenuItem Header="Components">
+                    <MenuItem Header="Valves"></MenuItem>
+                    <MenuItem Header="Sensors"></MenuItem>
+                    <MenuItem Header="Motor"></MenuItem>
+                    <MenuItem Header="TowerLight"></MenuItem>
+                    <MenuItem Header="CDS/CDU"></MenuItem>
+                    <MenuItem Header="Chemical"></MenuItem>
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+        <DataGrid Name="RowTable" VerticalGridLinesBrush="LightGray" HorizontalGridLinesBrush="LightGray">
+            <DataGrid.Columns >
+                <DataGridTextColumn Header="Channel #" Width="75" Binding="{Binding ModelName}">
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Name/Functions" Width="175">
+                    <DataGridTextColumn.Binding>
+                        <Binding Path="UnitCost" StringFormat="{}{0:C}">
+                            <Binding.ValidationRules>
+                                <local:PositivePriceRule Max="999.99" />
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Anonym" Binding="{Binding ModelNumber}"></DataGridTextColumn>
+
+                <DataGridComboBoxColumn Header="Logic" x:Name="categoryColumn"  
+  SelectedValueBinding="{Binding Path=CategoryID}"  SelectedValuePath="CategoryID"
+  DisplayMemberPath="CategoryName"
+                      ></DataGridComboBoxColumn>
+
+                <DataGridTemplateColumn Header="Date Added">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Margin="4" VerticalAlignment="Center" Text="{Binding Path=DateAdded, StringFormat={}{0:d}}"></TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <DatePicker Margin="4" SelectedDate="{Binding Path=DateAdded}"></DatePicker>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>
