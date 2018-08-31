@@ -5,13 +5,24 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ComprehensiveHardwareInventory"
         mc:Ignorable="d"
-    Title="MainWindow" Height="450" Width="800">
+    Title="MainWindow" Height="850" Width="1200">
+
+    
     <Grid>
-        <Menu>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <Menu Height="20">
             <MenuItem Header="File">
                 <MenuItem Header="New"></MenuItem>
                 <MenuItem Header="Open"></MenuItem>
                 <MenuItem Header="Save"></MenuItem>
+                <MenuItem Header="XML">
+                    <Button Click="OnClickGenerateXML">GenerateXML</Button>
+                    <Button Click="OnClickSaveToXML">SaveToXML</Button>
+                </MenuItem>
+                <MenuItem Header="SaveToExcel" Click="OnClickSaveToExcel"></MenuItem>
             </MenuItem>
             <MenuItem Header="Edit">
                 <MenuItem Header="Undo"></MenuItem>
@@ -48,40 +59,57 @@
                 </MenuItem>
             </MenuItem>
         </Menu>
-        <DataGrid Name="RowTable" VerticalGridLinesBrush="LightGray" HorizontalGridLinesBrush="LightGray">
-            <DataGrid.Columns >
-                <DataGridTextColumn Header="Channel #" Width="75" Binding="{Binding ModelName}">
-                </DataGridTextColumn>
-                <DataGridTextColumn Header="Name/Functions" Width="175">
-                    <DataGridTextColumn.Binding>
-                        <Binding Path="UnitCost" StringFormat="{}{0:C}">
-                            <Binding.ValidationRules>
-                                <local:PositivePriceRule Max="999.99" />
-                            </Binding.ValidationRules>
-                        </Binding>
-                    </DataGridTextColumn.Binding>
-                </DataGridTextColumn>
-                <DataGridTextColumn Header="Anonym" Binding="{Binding ModelNumber}"></DataGridTextColumn>
+        <DataGrid Name="ParametersTable" RowEditEnding="dataGrid_RowEditEnding" CanUserAddRows="True" VerticalGridLinesBrush="LightGray" HorizontalGridLinesBrush="LightGray" Grid.Row="2" >
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="FontSize" Value="18" />
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+            
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="DataGridCell">
+                                <TextBlock TextAlignment="Center" VerticalAlignment="Center">    
+                        <ContentPresenter />
+                                </TextBlock>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="FontSize" Value="16" />
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Foreground" Value="Black" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.CellStyle>
 
-                <DataGridComboBoxColumn Header="Logic" x:Name="categoryColumn"  
-  SelectedValueBinding="{Binding Path=CategoryID}"  SelectedValuePath="CategoryID"
-  DisplayMemberPath="CategoryName"
-                      ></DataGridComboBoxColumn>
+            <!--<DataGrid.Columns >
+                <DataGridTextColumn Header="Channel" Width="75">
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Module" Width="95">
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Component" Width="95">
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Parameter" Width="175">
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Anonym"></DataGridTextColumn>
+                <DataGridTextColumn Header="PhysicalAddress"></DataGridTextColumn>
+                <DataGridComboBoxColumn Header="Logic" Width="135"></DataGridComboBoxColumn>
 
-                <DataGridTemplateColumn Header="Date Added">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Margin="4" VerticalAlignment="Center" Text="{Binding Path=DateAdded, StringFormat={}{0:d}}"></TextBlock>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <DatePicker Margin="4" SelectedDate="{Binding Path=DateAdded}"></DatePicker>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
+                <DataGridTemplateColumn Header="Date Added" Width="95">
                 </DataGridTemplateColumn>
 
-            </DataGrid.Columns>
+                <DataGridTemplateColumn Header="Tag" Width="95">
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Comment" Width="95">
+                </DataGridTemplateColumn>
+
+            </DataGrid.Columns>-->
         </DataGrid>
     </Grid>
 </Window>
