@@ -108,11 +108,13 @@ namespace ComprehensiveHardwareInventory
 
         private void OnClickSaveToExcel(object sender, RoutedEventArgs e)
         {
-            string filename = String.Empty;
-            excelhelper = new ExcelHelper(filename);
-
-            GetXMLHierachy();
-            //MoveMotorOperation(1, true);
+            string filename = Tools.SaveExcelFileDialog();
+            if(filename.Length > 0)
+            {
+                excelhelper = new ExcelHelper(filename);
+                excelhelper.DataTableToExcel(ds.Tables[0], filename, true);
+            }
+            
         }
         
 

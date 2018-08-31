@@ -21,8 +21,8 @@ namespace ComprehensiveHardwareInventory
         {
             var sfd = new Microsoft.Win32.SaveFileDialog()
             {
-                DefaultExt = "xls",
-                Filter = "excel files(*.xls)|*.xls|All files(*.*)|*.*",
+                DefaultExt = ".xlsx",
+                Filter = "excel files(*.xlsx)|*.xls|All files(*.*)|*.*",
                 FilterIndex = 1
             };
 

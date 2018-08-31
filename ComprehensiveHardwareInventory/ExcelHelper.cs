@@ -179,5 +179,9 @@ namespace ComprehensiveHardwareInventory
                 disposed = true;
             }
         }
+
+        #region private methods
+        
+        #endregion
     }
 }
