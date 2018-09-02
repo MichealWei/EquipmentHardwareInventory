@@ -55,7 +55,10 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -82,6 +85,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="NPOIHelper.cs" />
     <Compile Include="Tools.cs" />
     <Compile Include="ExcelHelper.cs" />
     <Compile Include="MainWindow.xaml.cs">
@@ -109,7 +113,9 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="Files\057-2215 Ultra-C SJSEMI02 Wet Etch Machine EE IO List-P1.02.xls" />
-    <Content Include="Files\TemplateConfig.xml" />
+    <Content Include="Files\TemplateConfig.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <None Include="Files\ToolControl.Config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

@@ -15,14 +15,14 @@
         </Grid.RowDefinitions>
         <Menu Height="20">
             <MenuItem Header="File">
-                <MenuItem Header="New"></MenuItem>
-                <MenuItem Header="Open"></MenuItem>
-                <MenuItem Header="Save"></MenuItem>
                 <MenuItem Header="XML">
                     <Button Click="OnClickGenerateXML">GenerateXML</Button>
                     <Button Click="OnClickSaveToXML">SaveToXML</Button>
+                    <Button Click="OnClickSaveToConfig">SaveToConfig</Button>
                 </MenuItem>
                 <MenuItem Header="SaveToExcel" Click="OnClickSaveToExcel"></MenuItem>
+                <MenuItem Header="UpdateToExcel" Click="OnClickUpdateToExcel"></MenuItem>
+                <MenuItem Header="LoadExcel" Click="OnClickLoadExcel"></MenuItem>
             </MenuItem>
             <MenuItem Header="Edit">
                 <MenuItem Header="Undo"></MenuItem>
