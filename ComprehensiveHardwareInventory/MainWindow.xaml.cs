@@ -58,6 +58,7 @@ namespace ComprehensiveHardwareInventory
             ParametersTable.LoadingRow += new EventHandler<DataGridRowEventArgs>(dataGrid_LoadingRow);
             //OverwriteXMLFile();
             ReadXML();
+            WriteXML();
         }
 
 
@@ -94,7 +95,8 @@ namespace ComprehensiveHardwareInventory
             List<string> result = new List<string>();
             foreach (var item in array)
             {
-                result.Add((string)item);
+                string a = item.ToString();    // if the cell is never edited, i.e., null, then convert to ""  automactically
+                result.Add(a);
             }
             return result;
         }
@@ -175,13 +177,18 @@ namespace ComprehensiveHardwareInventory
             doc.Save(persistenFileName);
         }
 
-        private void WriteXML(List<string> rowlist)
+        //private void WriteXML(List<string> rowlist)
+        private void WriteXML()
         {
-            
-            XmlDocument doc = new XmlDocument();
-            doc.Load(Configfilename);
-            XmlNode root = doc.DocumentElement;
-            XmlNodeList RootNodes = root.SelectNodes(SystemXPath); 
+            XElement doc = XElement.Load(Configfilename);
+            IEnumerable<XObject> subset = from xobj in doc.Find("System")
+                                          select xobj;
+
+            //XmlDocument doc = XDocument.Load(Configfilename);
+            //XElement rootECS = doc.Root.Element("Ecs");
+            //XElement sys = rootECS.Element("System");
+            //WriteIO(string Index, string Name);
+            //WriteComponent(List<string>);
             
             //XmlNode Position = root.SelectSingleNode(SystemXPath);
             //XmlNode XPosition = Position.SelectSingleNode("XPosition");
@@ -233,7 +240,7 @@ namespace ComprehensiveHardwareInventory
             {
                 DataRow r = ((DataRowView)row).Row;
                 List<string> list = RowToList(r.ItemArray);
-                WriteXML(list);
+                WriteXML();
             }
             
         }

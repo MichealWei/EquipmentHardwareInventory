@@ -85,6 +85,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MyExtensions.cs" />
     <Compile Include="NPOIHelper.cs" />
     <Compile Include="Tools.cs" />
     <Compile Include="ExcelHelper.cs" />
