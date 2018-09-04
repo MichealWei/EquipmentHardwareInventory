@@ -57,7 +57,7 @@ namespace ComprehensiveHardwareInventory
             ParametersTable.ItemsSource = ds.Tables[0].DefaultView;
             ParametersTable.LoadingRow += new EventHandler<DataGridRowEventArgs>(dataGrid_LoadingRow);
             //OverwriteXMLFile();
-            ReadXML();
+            //ReadXML();
             WriteXML();
         }
 
@@ -181,8 +181,9 @@ namespace ComprehensiveHardwareInventory
         private void WriteXML()
         {
             XElement doc = XElement.Load(Configfilename);
-            IEnumerable<XObject> subset = from xobj in doc.Find("System")
-                                          select xobj;
+            //IEnumerable<XObject> subset = from xobj in doc.Find("System")
+            //select xobj;
+            XElement System = doc.FindFirstElement("Group","System");
 
             //XmlDocument doc = XDocument.Load(Configfilename);
             //XElement rootECS = doc.Root.Element("Ecs");

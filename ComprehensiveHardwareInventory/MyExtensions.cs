@@ -255,18 +255,18 @@ namespace ComprehensiveHardwareInventory
             }
         }
 
-        public static XElement FindElement(this XElement source, string value)
+        public static XElement FindFirstElement(this XElement source, string name, string value)
         {
-            if (source.Elements().Any())
+            if (source.Name == name && source.Attribute("Name").Value == value)
+                return source;
+            XElement result = null;
+            foreach (XElement child in source.Elements())
             {
-                foreach (XElement child in source.Elements())
-                {
-                    if (child.Name == value)
-                        return child;
-                    child.FindElement(value);
-                }
+                result = child.FindFirstElement(name, value);
+                if (result != null)
+                    break;
             }
-            return new XElement("not found");
+            return result;
         }
     }
 }

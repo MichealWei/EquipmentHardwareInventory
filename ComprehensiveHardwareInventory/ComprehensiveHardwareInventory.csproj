@@ -113,10 +113,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="Files\057-2215 Ultra-C SJSEMI02 Wet Etch Machine EE IO List-P1.02.xls" />
     <Content Include="Files\TemplateConfig.xml">
       <SubType>Designer</SubType>
     </Content>
+    <None Include="Files\057-2215 Ultra-C SJSEMI02 Wet Etch Machine EE IO List-P1.02.xls" />
     <None Include="Files\ToolControl.Config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
