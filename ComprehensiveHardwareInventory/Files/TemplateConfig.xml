@@ -1,13 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <configuration>
   <Security>
     <EncryptType>NoEncryption</EncryptType>
-    <ProtectionSignature>7c955f50617d61a191a02a615fd1edfb</ProtectionSignature>
+    <ProtectionSignature>9a01871b8a369f27756349c46eee952c</ProtectionSignature>
     <EncryptionSignature>ee531427a492326fe9c4ad7aac58554f</EncryptionSignature>
   </Security>
   <Ecs>
     <Header>
-      <Description>ECS configuration file for ECP demo tool.
-Created by yf.huang in March, 2016.</Description>
+      <Description>
+        ECS configuration file for ECP demo tool.
+        Created by yf.huang in March, 2016.
+      </Description>
     </Header>
     <Deployment>
       <Item Comment="Simulation deployment ">Simulation</Item>
@@ -1437,33 +1440,33 @@ Created by yf.huang in March, 2016.</Description>
               <Property Name="AIDefinitions">
                 <AnaInCell>
                   <Index>8</Index>
-                  <Name>CHEM1TemperatureTank</Name>
+                  <Name>TankTemperatureReading</Name>
                   <Unit>C</Unit>
                   <PhysicalMin>0</PhysicalMin>
                   <PhysicalMax>1000</PhysicalMax>
                   <LogicalMin>0</LogicalMin>
                   <LogicalMax>100</LogicalMax>
-                  <LogicOffset>1.4</LogicOffset>
+                  <LogicOffset>0</LogicOffset>
                 </AnaInCell>
                 <AnaInCell>
                   <Index>9</Index>
-                  <Name>CHEM2TemperatureTank1</Name>
+                  <Name>Tank1TemperatureReading</Name>
                   <Unit>C</Unit>
                   <PhysicalMin>0</PhysicalMin>
                   <PhysicalMax>1000</PhysicalMax>
                   <LogicalMin>0</LogicalMin>
                   <LogicalMax>100</LogicalMax>
-                  <LogicOffset>1.3</LogicOffset>
+                  <LogicOffset>0</LogicOffset>
                 </AnaInCell>
                 <AnaInCell>
                   <Index>10</Index>
-                  <Name>CHEM2TemperatureTank2</Name>
+                  <Name>Tank2TemperatureReading</Name>
                   <Unit>C</Unit>
                   <PhysicalMin>0</PhysicalMin>
                   <PhysicalMax>1000</PhysicalMax>
                   <LogicalMin>0</LogicalMin>
                   <LogicalMax>100</LogicalMax>
-                  <LogicOffset>1</LogicOffset>
+                  <LogicOffset>0</LogicOffset>
                 </AnaInCell>
                 <AnaInCell>
                   <Index>16</Index>
@@ -1497,22 +1500,22 @@ Created by yf.huang in March, 2016.</Description>
                 </AnaInCell>
                 <AnaInCell>
                   <Index>32</Index>
-                  <Name>CHEM1FlowReading</Name>
-                  <Unit>L/Min</Unit>
+                  <Name>FlowReading</Name>
+                  <Unit>40L/Min</Unit>
                   <PhysicalMin>0</PhysicalMin>
                   <PhysicalMax>32767</PhysicalMax>
                   <LogicalMin>4</LogicalMin>
-                  <LogicalMax>40</LogicalMax>
+                  <LogicalMax>40/</LogicalMax>
                   <LogicOffset>0</LogicOffset>
                 </AnaInCell>
                 <AnaInCell>
                   <Index>33</Index>
-                  <Name>CHEM2-1FlowReading</Name>
-                  <Unit>L/Min</Unit>
+                  <Name>FlowReading</Name>
+                  <Unit>40L/Min</Unit>
                   <PhysicalMin>0</PhysicalMin>
                   <PhysicalMax>32767</PhysicalMax>
                   <LogicalMin>4</LogicalMin>
-                  <LogicalMax>40</LogicalMax>
+                  <LogicalMax>40/</LogicalMax>
                   <LogicOffset>0</LogicOffset>
                 </AnaInCell>
                 <AnaInCell>
@@ -1527,7 +1530,7 @@ Created by yf.huang in March, 2016.</Description>
                 </AnaInCell>
                 <AnaInCell>
                   <Index>35</Index>
-                  <Name>CHEM1PressureSensor</Name>
+                  <Name>PressureSensor</Name>
                   <Unit>PSI</Unit>
                   <PhysicalMin>0</PhysicalMin>
                   <PhysicalMax>32767</PhysicalMax>
@@ -1607,7 +1610,7 @@ Created by yf.huang in March, 2016.</Description>
                 </AnaInCell>
                 <AnaInCell>
                   <Index>43</Index>
-                  <Name>H2O2Mixer-1Flow</Name>
+                  <Name>InletFlow</Name>
                   <Unit>LPM</Unit>
                   <PhysicalMin>0</PhysicalMin>
                   <PhysicalMax>32767</PhysicalMax>
@@ -1646,7 +1649,124 @@ Created by yf.huang in March, 2016.</Description>
                   <LogicOffset>0</LogicOffset>
                 </AnaInCell>
               </Property>
-              <Property Name="AODefinitions" />
+              <Property Name="AODefinitions">
+                <AnaOutCell>
+                  <Index>0</Index>
+                  <Name>CDIWIPConvertor</Name>
+                  <Unit>PSI</Unit>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>32767</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>60</LogicalMax>
+                  <LogicalOffset>0</LogicalOffset>
+                </AnaOutCell>
+                <AnaOutCell>
+                  <Index>1</Index>
+                  <Name>CHEM1IPconvertor</Name>
+                  <Unit>PSI</Unit>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>32767</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>60</LogicalMax>
+                  <LogicalOffset>0</LogicalOffset>
+                </AnaOutCell>
+                <AnaOutCell>
+                  <Index>2</Index>
+                  <Name>CHEM2-1IpConvertor</Name>
+                  <Unit>PSI</Unit>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>32767</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>60</LogicalMax>
+                  <LogicalOffset>0</LogicalOffset>
+                </AnaOutCell>
+                <AnaOutCell>
+                  <Index>3</Index>
+                  <Name>CHEM2-2IpConvertor</Name>
+                  <Unit>PSI</Unit>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>32767</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>60</LogicalMax>
+                  <LogicalOffset>0</LogicalOffset>
+                </AnaOutCell>
+                <AnaOutCell>
+                  <Index>8</Index>
+                  <Name>CHEM1HeaterrTemperatureSet</Name>
+                  <Unit>C</Unit>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>1000</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>100</LogicalMax>
+                  <LogicalOffset>0</LogicalOffset>
+                </AnaOutCell>
+                <AnaOutCell>
+                  <Index>9</Index>
+                  <Name>CHEM2-1HeaterTemperatureSet</Name>
+                  <Unit>C</Unit>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>1000</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>100</LogicalMax>
+                  <LogicalOffset>0</LogicalOffset>
+                </AnaOutCell>
+                <AnaOutCell>
+                  <Index>10</Index>
+                  <Name>CHEM2-2HeaterTemperatureSet</Name>
+                  <Unit>C</Unit>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>1000</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>100</LogicalMax>
+                  <LogicalOffset>0</LogicalOffset>
+                </AnaOutCell>
+                <AnaOutCell>
+                  <Index>11</Index>
+                  <Name>ChemberN2TemperatureSet</Name>
+                  <Unit>C</Unit>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>1000</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>100</LogicalMax>
+                  <LogicalOffset>0</LogicalOffset>
+                </AnaOutCell>
+                <AnaOutCell>
+                  <Index>50</Index>
+                  <Name>Chem1HeaterPower</Name>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>100</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>100</LogicalMax>
+                  <LogicalOffset>0</LogicalOffset>
+                </AnaOutCell>
+                <AnaOutCell>
+                  <Index>51</Index>
+                  <Name>Chem2Heater1Power</Name>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>100</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>100</LogicalMax>
+                  <LogicalOffset>0</LogicalOffset>
+                </AnaOutCell>
+                <AnaOutCell>
+                  <Index>52</Index>
+                  <Name>Chem2Heater2Power</Name>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>100</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>100</LogicalMax>
+                  <LogicalOffset>0</LogicalOffset>
+                </AnaOutCell>
+                <AnaOutCell>
+                  <Index>53</Index>
+                  <Name>N2HeaterPower</Name>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>100</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>100</LogicalMax>
+                  <LogicalOffset>0</LogicalOffset>
+                </AnaOutCell>
+              </Property>
               <Property Name="InterlockDefinitions" />
               <Property Name="QuitForceDOToFalse">true</Property>
               <Property Name="QuiteForceAOToZero">true</Property>
@@ -1709,7 +1829,6 @@ Created by yf.huang in March, 2016.</Description>
               <Property Name="IsIgnoreDouCroWafer">false</Property>
               <Property Name="NeedShowLotId">true</Property>
               <Property Name="AllowManualInputLotId">true</Property>
-              <Property Name="NeedShowLotIDInputDialog">false</Property>
               <Property Name="MaterialSizeRFIDMapList">
                 <MaterialSizeRFIDMap>
                   <MaterialSize>Size_8_Inch</MaterialSize>
@@ -1736,12 +1855,14 @@ Created by yf.huang in March, 2016.</Description>
               <Property Name="AutomaticallyReadRFID">true</Property>
               <Property Name="IsRFIDContainswaferSize">false</Property>
               <Property Name="RemoteSetRFIDByFA">false</Property>
-              <Property Name="MaterialSizeRemoteSetRFIDConfigList" />
+              <Property Name="UsingSeperateRFIDSettingInRemoteMode">false</Property>
             </Properties>
             <ParameterAccess>
               <Parameter Name="Enabled" Privilege="Enginner" />
               <Parameter Name="AlwaysRefreshManualInputRFIDBeforeLoad" Privilege="Enginner" />
               <Parameter Name="RFIDAutoReadFailHandling" Privilege="Enginner" />
+              <Parameter Name="RFIDAutoReadFailHandlingof8InchInRemoteMode" Privilege="Enginner" />
+              <Parameter Name="RFIDAutoReadFailHandlingof12InchInRemoteMode" Privilege="Enginner" />
               <Parameter Name="ManualInputRFIDTimeout" Privilege="Enginner" />
               <Parameter Name="SlotMappingTimeoutSetpoint" Privilege="Enginner" />
               <Parameter Name="SlotMapingErrorRetryCount" Privilege="Enginner" />
@@ -1783,7 +1904,6 @@ Created by yf.huang in March, 2016.</Description>
               <Property Name="IsIgnoreDouCroWafer">false</Property>
               <Property Name="NeedShowLotId">true</Property>
               <Property Name="AllowManualInputLotId">true</Property>
-              <Property Name="NeedShowLotIDInputDialog">false</Property>
               <Property Name="MaterialSizeRFIDMapList">
                 <MaterialSizeRFIDMap>
                   <MaterialSize>Size_8_Inch</MaterialSize>
@@ -1810,12 +1930,14 @@ Created by yf.huang in March, 2016.</Description>
               <Property Name="AutomaticallyReadRFID">true</Property>
               <Property Name="IsRFIDContainswaferSize">false</Property>
               <Property Name="RemoteSetRFIDByFA">false</Property>
-              <Property Name="MaterialSizeRemoteSetRFIDConfigList" />
+              <Property Name="UsingSeperateRFIDSettingInRemoteMode">false</Property>
             </Properties>
             <ParameterAccess>
               <Parameter Name="Enabled" Privilege="Enginner" />
               <Parameter Name="AlwaysRefreshManualInputRFIDBeforeLoad" Privilege="Enginner" />
               <Parameter Name="RFIDAutoReadFailHandling" Privilege="Enginner" />
+              <Parameter Name="RFIDAutoReadFailHandlingof8InchInRemoteMode" Privilege="Enginner" />
+              <Parameter Name="RFIDAutoReadFailHandlingof12InchInRemoteMode" Privilege="Enginner" />
               <Parameter Name="ManualInputRFIDTimeout" Privilege="Enginner" />
               <Parameter Name="SlotMappingTimeoutSetpoint" Privilege="Enginner" />
               <Parameter Name="SlotMapingErrorRetryCount" Privilege="Enginner" />
@@ -2261,7 +2383,6 @@ Created by yf.huang in March, 2016.</Description>
               <Property Name="IsIgnoreDouCroWafer">false</Property>
               <Property Name="NeedShowLotId">true</Property>
               <Property Name="AllowManualInputLotId">true</Property>
-              <Property Name="NeedShowLotIDInputDialog">false</Property>
               <Property Name="MaterialSizeRFIDMapList">
                 <MaterialSizeRFIDMap>
                   <MaterialSize>Size_8_Inch</MaterialSize>
@@ -2288,13 +2409,15 @@ Created by yf.huang in March, 2016.</Description>
               <Property Name="AutomaticallyReadRFID">true</Property>
               <Property Name="IsRFIDContainswaferSize">false</Property>
               <Property Name="RemoteSetRFIDByFA">false</Property>
-              <Property Name="MaterialSizeRemoteSetRFIDConfigList" />
+              <Property Name="UsingSeperateRFIDSettingInRemoteMode">false</Property>
             </Properties>
             <ParameterAccess>
               <Parameter Name="AutoReadRFID" Privilege="Enginner" />
               <Parameter Name="Enabled" Privilege="Enginner" />
               <Parameter Name="AlwaysRefreshManualInputRFIDBeforeLoad" Privilege="Enginner" />
               <Parameter Name="RFIDAutoReadFailHandling" Privilege="Enginner" />
+              <Parameter Name="RFIDAutoReadFailHandlingof8InchInRemoteMode" Privilege="Enginner" />
+              <Parameter Name="RFIDAutoReadFailHandlingof12InchInRemoteMode" Privilege="Enginner" />
               <Parameter Name="ManualInputRFIDTimeout" Privilege="Enginner" />
               <Parameter Name="SlotMappingTimeoutSetpoint" Privilege="Enginner" />
               <Parameter Name="SlotMapingErrorRetryCount" Privilege="Enginner" />
@@ -2381,7 +2504,6 @@ Created by yf.huang in March, 2016.</Description>
               <Property Name="IsIgnoreDouCroWafer">false</Property>
               <Property Name="NeedShowLotId">true</Property>
               <Property Name="AllowManualInputLotId">true</Property>
-              <Property Name="NeedShowLotIDInputDialog">false</Property>
               <Property Name="MaterialSizeRFIDMapList">
                 <MaterialSizeRFIDMap>
                   <MaterialSize>Size_8_Inch</MaterialSize>
@@ -2408,13 +2530,15 @@ Created by yf.huang in March, 2016.</Description>
               <Property Name="AutomaticallyReadRFID">true</Property>
               <Property Name="IsRFIDContainswaferSize">false</Property>
               <Property Name="RemoteSetRFIDByFA">false</Property>
-              <Property Name="MaterialSizeRemoteSetRFIDConfigList" />
+              <Property Name="UsingSeperateRFIDSettingInRemoteMode">false</Property>
             </Properties>
             <ParameterAccess>
               <Parameter Name="AutoReadRFID" Privilege="Enginner" />
               <Parameter Name="Enabled" Privilege="Enginner" />
               <Parameter Name="AlwaysRefreshManualInputRFIDBeforeLoad" Privilege="Enginner" />
               <Parameter Name="RFIDAutoReadFailHandling" Privilege="Enginner" />
+              <Parameter Name="RFIDAutoReadFailHandlingof8InchInRemoteMode" Privilege="Enginner" />
+              <Parameter Name="RFIDAutoReadFailHandlingof12InchInRemoteMode" Privilege="Enginner" />
               <Parameter Name="ManualInputRFIDTimeout" Privilege="Enginner" />
               <Parameter Name="SlotMappingTimeoutSetpoint" Privilege="Enginner" />
               <Parameter Name="SlotMapingErrorRetryCount" Privilege="Enginner" />
@@ -3084,8 +3208,7 @@ Created by yf.huang in March, 2016.</Description>
             </VariablePublish>
           </Component>
           <Component Name="ACPanelDoor" Type="ACM.Hardware.Sensor.DoorAlarmWarningSensor,ACM.Hardware.dll" Comment="">
-            <Deployment>
-            </Deployment>
+            <Deployment></Deployment>
             <Properties>
               <Property Name="DIInputIndex">118</Property>
               <Property Name="DoorOverrideDIInputIndex">40</Property>
@@ -4520,7 +4643,183 @@ Created by yf.huang in March, 2016.</Description>
             <Deployment>Any</Deployment>
             <Properties>
               <Property Name="ActualIODriverFullPath">System.IO.IODriver</Property>
-              <Property Name="DIDefinitions" />
+              <Property Name="DIDefinitions">
+                <DigInCell>
+                  <Index>4</Index>
+                  <Name>InterlockFeedback</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>8</Index>
+                  <Name>MotorInterlockFeedback</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>16</Index>
+                  <Name>FrameDoorRightNO</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>17</Index>
+                  <Name>FrameDoorBackNO</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>33</Index>
+                  <Name>Leak</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>112</Index>
+                  <Name>WaferPickUp</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>113</Index>
+                  <Name>WaferPickDowm</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>116</Index>
+                  <Name>CHEM1Drain_ReclaimSensor</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>117</Index>
+                  <Name>CHEM2Drain_ReclaimSensor</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>152</Index>
+                  <Name>ChamberGateOpenLeft</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>153</Index>
+                  <Name>ChamberGateCloseLeft</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>154</Index>
+                  <Name>ChamberGateOpenRight</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>155</Index>
+                  <Name>ChamberGateCloseRight</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>156</Index>
+                  <Name>InnerShroudUpLeft</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>157</Index>
+                  <Name>InnerShroudUpRight</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>158</Index>
+                  <Name>InnerShroudDownLeft</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>159</Index>
+                  <Name>InnerShroudDownRight</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>160</Index>
+                  <Name>MiddleShroudUpLeft</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>161</Index>
+                  <Name>MiddleShroudUpRight</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>162</Index>
+                  <Name>MiddleShroudDownLeft</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>163</Index>
+                  <Name>MiddleShroudDownRight</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>164</Index>
+                  <Name>OuterShroudUpLeft</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>165</Index>
+                  <Name>OuterShroudUpRight</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>166</Index>
+                  <Name>OuterShroudDownLeft</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+                <DigInCell>
+                  <Index>167</Index>
+                  <Name>OuterShroudDownRight</Name>
+                  <Default>false</Default>
+                  <NeedLatch>false</NeedLatch>
+                  <LatchWhen>false</LatchWhen>
+                </DigInCell>
+              </Property>
               <Property Name="DODefinitions">
                 <DigOutCell>
                   <Index>4</Index>
@@ -4650,6 +4949,86 @@ Created by yf.huang in March, 2016.</Description>
                   <PhysicalMax>32767</PhysicalMax>
                   <LogicalMin>0</LogicalMin>
                   <LogicalMax>4</LogicalMax>
+                  <LogicOffset>0</LogicOffset>
+                </AnaInCell>
+                <AnaInCell>
+                  <Index>49</Index>
+                  <Name>SW2CHEM2FlowSwitch</Name>
+                  <Unit>L/Min</Unit>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>32767</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>4</LogicalMax>
+                  <LogicOffset>0</LogicOffset>
+                </AnaInCell>
+                <AnaInCell>
+                  <Index>50</Index>
+                  <Name>FrontSW3CDIWFlowSwitch</Name>
+                  <Unit>L/Min</Unit>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>32767</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>4</LogicalMax>
+                  <LogicOffset>0</LogicOffset>
+                </AnaInCell>
+                <AnaInCell>
+                  <Index>51</Index>
+                  <Name>FFUPressureReading</Name>
+                  <Unit>Pa</Unit>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>32767</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>124.5</LogicalMax>
+                  <LogicOffset>0</LogicOffset>
+                </AnaInCell>
+                <AnaInCell>
+                  <Index>52</Index>
+                  <Name>ProcessExhaustPressure</Name>
+                  <Unit>Pa</Unit>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>32767</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>500</LogicalMax>
+                  <LogicOffset>0</LogicOffset>
+                </AnaInCell>
+                <AnaInCell>
+                  <Index>53</Index>
+                  <Name>WaferCopperDetection</Name>
+                  <Unit />
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>32767</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>4000</LogicalMax>
+                  <LogicOffset>0</LogicOffset>
+                </AnaInCell>
+                <AnaInCell>
+                  <Index>54</Index>
+                  <Name>EnvironmentPressureReading</Name>
+                  <Unit>Pa</Unit>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>32767</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>500</LogicalMax>
+                  <LogicOffset>0</LogicOffset>
+                </AnaInCell>
+                <AnaInCell>
+                  <Index>55</Index>
+                  <Name>BackCDIWFlowSwitch</Name>
+                  <Unit>L/Min</Unit>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>32767</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>4</LogicalMax>
+                  <LogicOffset>0</LogicOffset>
+                </AnaInCell>
+                <AnaInCell>
+                  <Index>84</Index>
+                  <Name>FlowReading</Name>
+                  <Unit>LPM</Unit>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>32767</PhysicalMax>
+                  <LogicalMin>10</LogicalMin>
+                  <LogicalMax>100</LogicalMax>
                   <LogicOffset>0</LogicOffset>
                 </AnaInCell>
               </Property>
@@ -6734,7 +7113,7 @@ Created by yf.huang in March, 2016.</Description>
                 </AnaInCell>
                 <AnaInCell>
                   <Index>59</Index>
-                  <Name>FFUPressureReading</Name>
+                  <Name>PressureReading</Name>
                   <Unit>Pa</Unit>
                   <PhysicalMin>0</PhysicalMin>
                   <PhysicalMax>32767</PhysicalMax>
@@ -6763,7 +7142,7 @@ Created by yf.huang in March, 2016.</Description>
                 </AnaInCell>
                 <AnaInCell>
                   <Index>62</Index>
-                  <Name>EnvironmentPressureReading</Name>
+                  <Name>PressureReading</Name>
                   <Unit>Pa</Unit>
                   <PhysicalMin>0</PhysicalMin>
                   <PhysicalMax>32767</PhysicalMax>

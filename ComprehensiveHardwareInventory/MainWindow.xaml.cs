@@ -17,6 +17,7 @@ using System.Windows.Shapes;
 using System.Xml.Serialization;
 using System.Xml;
 using System.Xml.Linq;
+using System.Text.RegularExpressions;
 using System.Data;
 
 namespace ComprehensiveHardwareInventory
@@ -58,7 +59,6 @@ namespace ComprehensiveHardwareInventory
             ParametersTable.LoadingRow += new EventHandler<DataGridRowEventArgs>(dataGrid_LoadingRow);
             //OverwriteXMLFile();
             //ReadXML();
-            WriteXML();
         }
 
 
@@ -177,32 +177,133 @@ namespace ComprehensiveHardwareInventory
             doc.Save(persistenFileName);
         }
 
-        //private void WriteXML(List<string> rowlist)
-        private void WriteXML()
+        private void WriteXML(List<string> rowlist)
         {
             XElement doc = XElement.Load(Configfilename);
-            //IEnumerable<XObject> subset = from xobj in doc.Find("System")
-            //select xobj;
-            XElement System = doc.FindFirstElement("Group","System");
+            XElement System = doc.FindFirstElement("Group", "System");
+            XElement ChamA1 = doc.FindFirstElement("Group", "A1");
+            XElement ChamA2 = doc.FindFirstElement("Group", "A2");
+            XElement ChamB1= doc.FindFirstElement("Group", "B1");
+            XElement ChamB2 = doc.FindFirstElement("Group", "B2");
+            XElement ModuleNode = null;
+            XElement NewIONode = null;
+            XElement IOListNode = null;
+            switch (rowlist[1])
+            {
+                case "System":
+                    ModuleNode = System;
+                    break;
+                case "A1":
+                    ModuleNode = ChamA1;
+                    break;
+                case "A2":
+                    ModuleNode = ChamA2;
+                    break;
+                case "B1":
+                    ModuleNode = ChamB1;
+                    break;
+                case "B2":
+                    ModuleNode = ChamB2;
+                    break;
+            }
+            string IOType = rowlist[0].Substring(0, 2).ToUpper();
+            switch (IOType)
+            {
+                case "AX":
+                    {
+                        NewIONode = MakeAnalogElement(rowlist);
+                        IOListNode = ModuleNode.FindFirstElement("Property", "AIDefinitions");
+                    } 
+                    break;
+                case "AY":
+                    {
+                        NewIONode = MakeAnalogElement(rowlist);
+                        IOListNode = ModuleNode.FindFirstElement("Property", "AODefinitions");
+                    }
+                    break;
+                case "DX":
+                    {
+                        NewIONode = MakeDigitalElement(rowlist[0], rowlist[3]);
+                        IOListNode = ModuleNode.FindFirstElement("Property", "DIDefinitions");
+                    } 
+                    break;
+                case "DY":
+                    {
+                        NewIONode = MakeDigitalElement(rowlist[0], rowlist[3]);
+                        IOListNode = ModuleNode.FindFirstElement("Property", "DODefinitions");
+                    } 
+                    break;
+            }
 
-            //XmlDocument doc = XDocument.Load(Configfilename);
-            //XElement rootECS = doc.Root.Element("Ecs");
-            //XElement sys = rootECS.Element("System");
-            //WriteIO(string Index, string Name);
-            //WriteComponent(List<string>);
-            
-            //XmlNode Position = root.SelectSingleNode(SystemXPath);
-            //XmlNode XPosition = Position.SelectSingleNode("XPosition");
-            //XPosition.InnerText = Xvalue.ToString();
-            //XmlNode ZPosition = Position.SelectSingleNode("ZPosition");
-            //ZPosition.InnerText = Zvalue.ToString();
-            //doc.Save(persistenFileName);
+            if(IOListNode != null)
+            {
+                bool IsFound = false;
+                foreach(var item in IOListNode.Elements())
+                {
+                    if (item.Element("Index").Value == NewIONode.Element("Index").Value && item.Element("Name").Value != NewIONode.Element("Name").Value)
+                    {
+                        IsFound = true;
+                        item.ReplaceAll(NewIONode.Elements());
+                        break;
+                    }
+                }
+                if(!IsFound)
+                    IOListNode.Add(NewIONode);
+            }
+            doc.Save(Configfilename);
         }
 
-        private XElement MakeAnalogElement(string index,string Name, string Unit, string PhysicalMin, string PhysicalMax, string LogicalMin, string LogicalMax, string LogicOffset)
+        private XElement MakeAnalogElement(string index, string Name, string Unit, string PhysicalMin, string PhysicalMax, string LogicalMin, string LogicalMax, string LogicOffset)
         {
-            string AnalogDirection = index.Substring(0, 2).ToUpper() == "AX" ? "AnaInCell": "AnaOutCell";
+            string AnalogDirection = index.Substring(0, 2).ToUpper() == "AX" ? "AnaInCell" : "AnaOutCell";
             int indexInt = int.Parse(index.Substring(2));
+            XElement result = new XElement(AnalogDirection,
+                                        new XElement("Index", indexInt),
+                                        new XElement("Name", Name),
+                                        new XElement("Unit", Unit),
+                                        new XElement("PhysicalMin", PhysicalMin),
+                                        new XElement("PhysicalMax", PhysicalMax),
+                                        new XElement("LogicalMin", LogicalMin),
+                                        new XElement("LogicalMax", LogicalMax),
+                                        new XElement("LogicOffset", LogicOffset)
+                                        );
+            return result;
+        }
+
+        private XElement MakeAnalogElement(List<string> list)
+        {
+            string Unit;
+            string PhysicalMin = "0";
+            string PhysicalMax = "32767";
+            string LogicalMin = String.Empty;
+            string LogicalMax = String.Empty;
+            string LogicOffset = "0";
+            string Name = list[3];
+
+            if (list[3].Contains("Temperature"))
+            {
+                Unit = "C";
+                if (list[6].Trim() == "/10")
+                {
+                    LogicalMax = "100";
+                    LogicalMin = "0";
+                    PhysicalMax = "1000";
+                }
+            }
+            else
+            {
+                string[] RangeItems = list[6].Split(':');
+                //if (RangeItems[0].Trim().Contains(""))   // if it's half range, use 16383
+                //{
+                //    PhysicalMax = "16383";
+                //}
+                string[] logicalItems = RangeItems[1].Trim().Split('-');
+                LogicalMin = logicalItems[0].Trim();
+                LogicalMax = Regex.Replace(logicalItems[1], "[a-z]", "", RegexOptions.IgnoreCase);
+                Unit = logicalItems[1].Replace(LogicalMax,"");
+            }
+            string AnalogDirection = list[0].Substring(0,2).ToUpper() == "AX" ? "AnaInCell" : "AnaOutCell";
+            int indexInt = int.Parse(list[0].Substring(2));
             XElement result = new XElement(AnalogDirection,
                                         new XElement("Index", indexInt),
                                         new XElement("Name", Name),
@@ -221,7 +322,7 @@ namespace ComprehensiveHardwareInventory
             string DigitalDirection = index.Substring(0, 2).ToUpper() == "DX" ? "DigInCell" : "DigOutCell";
             int indexInt = int.Parse(index.Substring(2));
             XElement result = null;
-            if(index.Substring(0, 2).ToUpper() == "DX")
+            if (index.Substring(0, 2).ToUpper() == "DX")
             {
                 result = new XElement("DigOutCell",
                             new XElement("Index", indexInt),
@@ -231,7 +332,7 @@ namespace ComprehensiveHardwareInventory
                             new XElement("LatchWhen", "false")
                         );
             }
-            else if(index.Substring(0, 2).ToUpper() == "DY")
+            else if (index.Substring(0, 2).ToUpper() == "DY")
             {
                 result = new XElement("DigOutCell",
                             new XElement("Index", indexInt),
@@ -240,19 +341,6 @@ namespace ComprehensiveHardwareInventory
             }
 
             return result;
-        }
-        private void WriteDataToXML(string path, List<string> dataValue)
-        {
-            //rowlist[1] rowlist[0]
-            //XmlDocument doc = new XmlDocument();
-            //doc.Load(TableToXMLFileName);
-            //XmlNode root = doc.DocumentElement;
-            //XmlNode Position = root.SelectSingleNode(rootNode);
-            //XmlNode XPosition = Position.SelectSingleNode("XPosition");
-            //XPosition.InnerText = Xvalue.ToString();
-            //XmlNode ZPosition = Position.SelectSingleNode("ZPosition");
-            //ZPosition.InnerText = Zvalue.ToString();
-            //doc.Save(persistenFileName);
         }
 
         private void OverwriteXMLFile()
@@ -283,7 +371,7 @@ namespace ComprehensiveHardwareInventory
             {
                 DataRow r = ((DataRowView)row).Row;
                 List<string> list = RowToList(r.ItemArray);
-                WriteXML();
+                WriteXML(list);
             }
             
         }
