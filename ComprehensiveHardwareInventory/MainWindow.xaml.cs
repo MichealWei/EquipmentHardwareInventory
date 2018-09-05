@@ -58,7 +58,6 @@ namespace ComprehensiveHardwareInventory
             ParametersTable.LoadingRow += new EventHandler<DataGridRowEventArgs>(dataGrid_LoadingRow);
             //OverwriteXMLFile();
             //ReadXML();
-            WriteXML();
         }
 
 
@@ -177,27 +176,67 @@ namespace ComprehensiveHardwareInventory
             doc.Save(persistenFileName);
         }
 
-        //private void WriteXML(List<string> rowlist)
-        private void WriteXML()
+        private void WriteXML(List<string> rowlist)
         {
             XElement doc = XElement.Load(Configfilename);
-            //IEnumerable<XObject> subset = from xobj in doc.Find("System")
-            //select xobj;
             XElement System = doc.FindFirstElement("Group","System");
+            XElement ChamA1 = doc.FindFirstElement("Group","A1");
+            XElement ChamA2 = doc.FindFirstElement("Group","A2");
+            XElement ChamA3 = doc.FindFirstElement("Group","A3");
 
-            //XmlDocument doc = XDocument.Load(Configfilename);
-            //XElement rootECS = doc.Root.Element("Ecs");
-            //XElement sys = rootECS.Element("System");
-            //WriteIO(string Index, string Name);
-            //WriteComponent(List<string>);
-            
-            //XmlNode Position = root.SelectSingleNode(SystemXPath);
-            //XmlNode XPosition = Position.SelectSingleNode("XPosition");
-            //XPosition.InnerText = Xvalue.ToString();
-            //XmlNode ZPosition = Position.SelectSingleNode("ZPosition");
-            //ZPosition.InnerText = Zvalue.ToString();
-            //doc.Save(persistenFileName);
+            XElement NodeToWrite;
+            switch (rowlist[0])
+            {
+                case "System":
+                    NodeToWrite = System;
+                    break;
+                case "A1":
+                    NodeToWrite = ChamA1;
+                    break;
+
+                case "A2":
+                    NodeToWrite = ChamA2;
+                    break;
+                case "A3":
+                    NodeToWrite = ChamA3;
+                    break;
+            }
         }
+
+        private void WriteToIOList(XElement NodeToWrite, string channel, string name, string logic)
+        {
+            string IOType = channel.Substring(0, 2).ToUpper();
+            string att = IOType + "Definitions";
+            int index = int.Parse(channel.Substring(2));
+            XElement items = NodeToWrite.FindFirstElement("Property",att);
+            XElement Item;
+            string ItemTag;
+            switch (IOType)
+            {
+                case "AX":
+                    ItemTag = "AnaInCell";
+                    break;
+                case "AY":
+                    ItemTag = "AnaOutCell";
+                    break;
+                case "DX":
+                    ItemTag = "DigInCell";
+                    break;
+                case "DY":
+                    ItemTag = "DigOutCell";
+                    break;
+
+            }
+            foreach(var item in items.Elements())
+            {
+                if(int.Parse(item.Element("index").Value) == index)
+                {
+                    item.ReplaceWith(Item);
+                }
+            }
+        }
+
+       
 
         private void WriteDataToXML(string path, List<string> dataValue)
         {
@@ -241,7 +280,7 @@ namespace ComprehensiveHardwareInventory
             {
                 DataRow r = ((DataRowView)row).Row;
                 List<string> list = RowToList(r.ItemArray);
-                WriteXML();
+                WriteXML(list);
             }
             
         }
