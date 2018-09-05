@@ -58,6 +58,7 @@ namespace ComprehensiveHardwareInventory
             ParametersTable.LoadingRow += new EventHandler<DataGridRowEventArgs>(dataGrid_LoadingRow);
             //OverwriteXMLFile();
             //ReadXML();
+            WriteXML();
         }
 
 
@@ -176,68 +177,70 @@ namespace ComprehensiveHardwareInventory
             doc.Save(persistenFileName);
         }
 
-        private void WriteXML(List<string> rowlist)
+        //private void WriteXML(List<string> rowlist)
+        private void WriteXML()
         {
             XElement doc = XElement.Load(Configfilename);
+            //IEnumerable<XObject> subset = from xobj in doc.Find("System")
+            //select xobj;
             XElement System = doc.FindFirstElement("Group","System");
-            XElement ChamA1 = doc.FindFirstElement("Group","A1");
-            XElement ChamA2 = doc.FindFirstElement("Group","A2");
-            XElement ChamA3 = doc.FindFirstElement("Group","A3");
 
-            XElement NodeToWrite;
-            switch (rowlist[0])
-            {
-                case "System":
-                    NodeToWrite = System;
-                    break;
-                case "A1":
-                    NodeToWrite = ChamA1;
-                    break;
-
-                case "A2":
-                    NodeToWrite = ChamA2;
-                    break;
-                case "A3":
-                    NodeToWrite = ChamA3;
-                    break;
-            }
+            //XmlDocument doc = XDocument.Load(Configfilename);
+            //XElement rootECS = doc.Root.Element("Ecs");
+            //XElement sys = rootECS.Element("System");
+            //WriteIO(string Index, string Name);
+            //WriteComponent(List<string>);
+            
+            //XmlNode Position = root.SelectSingleNode(SystemXPath);
+            //XmlNode XPosition = Position.SelectSingleNode("XPosition");
+            //XPosition.InnerText = Xvalue.ToString();
+            //XmlNode ZPosition = Position.SelectSingleNode("ZPosition");
+            //ZPosition.InnerText = Zvalue.ToString();
+            //doc.Save(persistenFileName);
         }
 
-        private void WriteToIOList(XElement NodeToWrite, string channel, string name, string logic)
+        private XElement MakeAnalogElement(string index,string Name, string Unit, string PhysicalMin, string PhysicalMax, string LogicalMin, string LogicalMax, string LogicOffset)
         {
-            string IOType = channel.Substring(0, 2).ToUpper();
-            string att = IOType + "Definitions";
-            int index = int.Parse(channel.Substring(2));
-            XElement items = NodeToWrite.FindFirstElement("Property",att);
-            XElement Item;
-            string ItemTag;
-            switch (IOType)
-            {
-                case "AX":
-                    ItemTag = "AnaInCell";
-                    break;
-                case "AY":
-                    ItemTag = "AnaOutCell";
-                    break;
-                case "DX":
-                    ItemTag = "DigInCell";
-                    break;
-                case "DY":
-                    ItemTag = "DigOutCell";
-                    break;
-
-            }
-            foreach(var item in items.Elements())
-            {
-                if(int.Parse(item.Element("index").Value) == index)
-                {
-                    item.ReplaceWith(Item);
-                }
-            }
+            string AnalogDirection = index.Substring(0, 2).ToUpper() == "AX" ? "AnaInCell": "AnaOutCell";
+            int indexInt = int.Parse(index.Substring(2));
+            XElement result = new XElement(AnalogDirection,
+                                        new XElement("Index", indexInt),
+                                        new XElement("Name", Name),
+                                        new XElement("Unit", Unit),
+                                        new XElement("PhysicalMin", PhysicalMin),
+                                        new XElement("PhysicalMax", PhysicalMax),
+                                        new XElement("LogicalMin", LogicalMin),
+                                        new XElement("LogicalMax", LogicalMax),
+                                        new XElement("LogicOffset", LogicOffset)
+                                        );
+            return result;
         }
 
-       
+        private XElement MakeDigitalElement(string index, string Name)
+        {
+            string DigitalDirection = index.Substring(0, 2).ToUpper() == "DX" ? "DigInCell" : "DigOutCell";
+            int indexInt = int.Parse(index.Substring(2));
+            XElement result = null;
+            if(index.Substring(0, 2).ToUpper() == "DX")
+            {
+                result = new XElement("DigOutCell",
+                            new XElement("Index", indexInt),
+                            new XElement("Name", Name),
+                            new XElement("Default", "false"),
+                            new XElement("NeedLatch", "false"),
+                            new XElement("LatchWhen", "false")
+                        );
+            }
+            else if(index.Substring(0, 2).ToUpper() == "DY")
+            {
+                result = new XElement("DigOutCell",
+                            new XElement("Index", indexInt),
+                            new XElement("Name", Name)
+                        );
+            }
 
+            return result;
+        }
         private void WriteDataToXML(string path, List<string> dataValue)
         {
             //rowlist[1] rowlist[0]
@@ -280,7 +283,7 @@ namespace ComprehensiveHardwareInventory
             {
                 DataRow r = ((DataRowView)row).Row;
                 List<string> list = RowToList(r.ItemArray);
-                WriteXML(list);
+                WriteXML();
             }
             
         }
