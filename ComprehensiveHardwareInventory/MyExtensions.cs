@@ -268,5 +268,20 @@ namespace ComprehensiveHardwareInventory
             }
             return result;
         }
+
+        public static XElement FindFirstElement(this XElement source, string name)
+        {
+            if (source.Name == name)
+                return source;
+            XElement result = null;
+            foreach (XElement child in source.Elements())
+            {
+                result = child.FindFirstElement(name);
+                if (result != null)
+                    break;
+            }
+            return result;
+        }
+
     }
 }

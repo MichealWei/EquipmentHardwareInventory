@@ -19,6 +19,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
 using System.Data;
+using System.Globalization;
 
 namespace ComprehensiveHardwareInventory
 {
@@ -343,40 +344,153 @@ namespace ComprehensiveHardwareInventory
             return result;
         }
 
-        private void OverwriteXMLFile()
-        {
-            XmlWriterSettings settings = new XmlWriterSettings();
-            settings.Indent = true;
-            using (XmlWriter writer = XmlWriter.Create(TableToXMLFileName, settings))
-            {
-                writer.WriteStartDocument();
-                writer.WriteStartElement("ToolControl");
-                writer.WriteStartElement("Group");
-                writer.WriteStartAttribute("Name");
-                writer.WriteValue("System");
-                writer.WriteEndElement();
-                writer.WriteEndElement();
-            }
-
-        }
 
         private void ReadXML()
         {
             XElement fromFile = XElement.Load(Configfilename); 
         }
 
-        private void OnClickSaveToConfig(object sender, RoutedEventArgs e)
+        private void OnClickSaveToConfig(object sender, RoutedEventArgs e)     // This will only update the list, not delete all, change a node if it has already there. 
         {
+
+            XElement doc = XElement.Load(Configfilename);
+            XElement ToolControl = doc.FindFirstElement("ToolControl");
+            IEnumerable<XElement> ModuleList = ToolControl.Elements();
+
+            Dictionary<string, XElement> HierarchyDic = new Dictionary<string, XElement>();
+                   
+            foreach(var module in ToolControl.Elements())
+            {
+                XElement IODefinitionNode = module.FindFirstElement("Property", "AIDefinitions");
+                HierarchyDic.Add((module.Attribute("Name").Value + "ax").ToLower(), IODefinitionNode);     // e.g. <systemax,XElement("System/AIDefinitions")>.
+                IODefinitionNode = module.FindFirstElement("Property", "AODefinitions");
+                HierarchyDic.Add((module.Attribute("Name").Value + "ay").ToLower(), IODefinitionNode);
+                IODefinitionNode = module.FindFirstElement("Property", "DIDefinitions");
+                HierarchyDic.Add((module.Attribute("Name").Value + "dx").ToLower(), IODefinitionNode);
+                IODefinitionNode = module.FindFirstElement("Property", "DODefinitions");
+                HierarchyDic.Add((module.Attribute("Name").Value + "dy").ToLower(), IODefinitionNode);
+            }
+
+            XElement ModuleNode = null;
+            XElement NewIONode = null;
+            XElement IOListNode = null;
+            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+
             foreach (var row in ParametersTable.ItemsSource)
             {
                 DataRow r = ((DataRowView)row).Row;
                 List<string> list = RowToList(r.ItemArray);
-                WriteXML(list);
+
+                ModuleNode = ToolControl.Element(textInfo.ToTitleCase(list[1]));
+                
+                string IOType = list[0].Substring(0, 2).ToUpper();
+                switch (IOType)
+                {
+                    case "DX":
+                    case "DY":
+                        NewIONode = MakeDigitalElement(list[0], list[3]);
+                        break;
+                    case "AX":
+                    case "AY":
+                        NewIONode = MakeAnalogElement(list);
+                        break;
+                    default:
+                        MessageBox.Show("IO index {0} is wrong! check again.", list[0]);
+                        return;
+                }
+                IOListNode = HierarchyDic[(list[1].Trim() + list[0].Trim().Substring(0,2)).ToLower()];   // e.g. "System" + "Ax"  => systemax .
+
+                if (IOListNode != null)
+                {
+                    bool IsFound = false;
+                    foreach (var item in IOListNode.Elements())
+                    {
+                        if (item.Element("Index").Value == NewIONode.Element("Index").Value && item.Element("Name").Value != NewIONode.Element("Name").Value)
+                        {
+                            IsFound = true;
+                            item.ReplaceAll(NewIONode.Elements());
+                            break;
+                        }
+                    }
+                    if (!IsFound)
+                        IOListNode.Add(NewIONode);
+                }
             }
             
+            doc.Save(Configfilename);
         }
-        
 
+        private void OnClickOverwriteConfig(object sender, RoutedEventArgs e)   // This will delete all the IO list and then add from the beginning.
+        {
+            XElement doc = XElement.Load(Configfilename);
+            XElement ToolControl = doc.FindFirstElement("ToolControl");
+            IEnumerable<XElement> ModuleList = ToolControl.Elements();
+
+            Dictionary<string, XElement> HierarchyDic = new Dictionary<string, XElement>();
+
+            foreach (var module in ToolControl.Elements())
+            {
+                XElement IODefinitionNode = module.FindFirstElement("Property", "AIDefinitions");
+                HierarchyDic.Add((module.Attribute("Name").Value + "ax").ToLower(), IODefinitionNode);     // e.g. <systemax,XElement("System/AIDefinitions")>.
+                IODefinitionNode = module.FindFirstElement("Property", "AODefinitions");
+                HierarchyDic.Add((module.Attribute("Name").Value + "ay").ToLower(), IODefinitionNode);
+                IODefinitionNode = module.FindFirstElement("Property", "DIDefinitions");
+                HierarchyDic.Add((module.Attribute("Name").Value + "dx").ToLower(), IODefinitionNode);
+                IODefinitionNode = module.FindFirstElement("Property", "DODefinitions");
+                HierarchyDic.Add((module.Attribute("Name").Value + "dy").ToLower(), IODefinitionNode);
+            }
+            foreach (var item in HierarchyDic.Values)              // Here is the differences with the OnClickSaveToConfig method, only this loop.
+            {
+                item.RemoveAll();
+            }
+            XElement ModuleNode = null;
+            XElement NewIONode = null;
+            XElement IOListNode = null;
+            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+
+            foreach (var row in ParametersTable.ItemsSource)
+            {
+                DataRow r = ((DataRowView)row).Row;
+                List<string> list = RowToList(r.ItemArray);
+
+                ModuleNode = ToolControl.Element(textInfo.ToTitleCase(list[1]));
+
+                string IOType = list[0].Substring(0, 2).ToUpper();
+                switch (IOType)
+                {
+                    case "DX":
+                    case "DY":
+                        NewIONode = MakeDigitalElement(list[0], list[3]);
+                        break;
+                    case "AX":
+                    case "AY":
+                        NewIONode = MakeAnalogElement(list);
+                        break;
+                    default:
+                        MessageBox.Show("IO index {0} is wrong! check again.", list[0]);
+                        return;
+                }
+                IOListNode = HierarchyDic[(list[1].Trim() + list[0].Trim().Substring(0, 2)).ToLower()];   // e.g. "System" + "Ax"  => systemax .
+
+                if (IOListNode != null)
+                {
+                    bool IsFound = false;
+                    foreach (var item in IOListNode.Elements())
+                    {
+                        if (item.Element("Index").Value == NewIONode.Element("Index").Value && item.Element("Name").Value != NewIONode.Element("Name").Value)
+                        {
+                            IsFound = true;
+                            item.ReplaceAll(NewIONode.Elements());
+                            break;
+                        }
+                    }
+                    if (!IsFound)
+                        IOListNode.Add(NewIONode);
+                }
+            }
+
+            doc.Save(Configfilename);
+        }
         #endregion
     }
 
