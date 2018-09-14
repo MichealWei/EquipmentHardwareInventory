@@ -1,0 +1,8 @@
+CHEM1 Temperature Reading 
+Frontside SW3 CDIW Flow Switch
+Anneal-5 Arm Down Position Sensor
+Vac Trap Vacuum Pressure Reading
+Light Tower Flash Yellow
+Light Tower Flash Red
+Cassette Lot Finish Audiable Signal
+Anneal-1 arm rotaion forth valve

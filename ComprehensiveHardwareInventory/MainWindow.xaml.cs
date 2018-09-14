@@ -1,25 +1,20 @@
 ﻿using System;
 using System.IO;
-using System.Configuration;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Xml.Serialization;
-using System.Xml;
-using System.Xml.Linq;
-using System.Text.RegularExpressions;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Globalization;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Xml.Linq;
+using System.Reflection;
+using System.ComponentModel;
 
 namespace ComprehensiveHardwareInventory
 {
@@ -30,38 +25,199 @@ namespace ComprehensiveHardwareInventory
     {
         #region fields
         private string currentfile;
+        private ListCollectionView view;
         private static string CurrentProgramPath = System.Environment.CurrentDirectory.Replace("\\bin\\Debug", "\\");
         private string Configfilename = CurrentProgramPath + "Files\\TemplateConfig.xml";
-        private string TableToXMLFileName;
-        private string persistenFileName;
-        private string SystemXPath = "Ecs/ToolControl/Group";
-        private string ChamberAXPath = "";
-        private string ChamberBXPath = "";
-        private DataSet ds = new DataSet();
+        private string AutoWordsFile = CurrentProgramPath + "Files\\AutoWordsList.txt";
+        private ObservableCollection<ItemRow> TableRowsList = new ObservableCollection<ItemRow>();
+        private bool IsExcelLoaded = false;
+        private string user = CurrentProgramPath.Split('\\')[2];
+        private string currentIOView = String.Empty;
+        private static DataTable dt = new DataTable();
+        private static DataTable currentDt = dt.Clone();
+        private string currentCellOldValue = String.Empty;
+        private List<string> ChannelsListStrings = new List<string> { "ax", "ay", "dx", "dy" };
+        private List<string> ModulesListStrings = new List<string> { "System", "A", "A1", "A2", "A3", "A4", "B", "B1", "B2", "B3", "B4", "C", "C1", "C2", "C3", "C4", "D", "D1", "D2", "D3", "D4", "E", "E1", "E2", "F", "F1", "F2", "G", "G1", "G2" };
+        private List<string> ParametersListStrings = new List<string> { "CHEM1 Temperature Reading", "FlowReading", "PressureReading", "Yellow", "Green","Blue", "Enable", "UpValve", "OnOffValve", "DownValve", "DryValve", "OutValve", "SupplyValve", "TankToChamberValve", "Valve", "DSP Tank H2O2 In Flow Reading", "VMS Tank Supply Pump Speed Reading",
+                                                                        "ReclaimToTankValve", "ExchangerPCWOutValve", "PumpOnOffValve", " FeedbackValve", "FinishAudiableSignal", "StartAudiableSignal", "Signal", "Sensor", "Anneal1 Heater Temperature Reading", "H2SO4 Tank DIW In Flow Reading", "CHEM1 Tank High Sensor", "N2 Protect Bearing Pressure Sensor",  "Wafer Pick Up Position Sensor", "Frame Door Sensor Chamber A1 Backside NO", "Frame Door Sensor Chamber A2 Rightside NO",
+                                                                        "H2 MFC Inlet Pressure Reading", "CHEM2", "H2", "CO2", "N2 Line1 MFC Reading", "H2SO4 Supply Levitronix Pump Speed Reading", "DIW", "CDIW Pressure Reading", "DSP", "Heater", "LightTower", "ChamberLight", "FrameLight", "MotorInterlock", "EFEM Interlock And Enable Feedback", "EnvironmentExhaust", "H2O2Mixer",
+                                                                        "OuterShroud", "MiddleShroud", "InnerShroud", "Loadport", "MainVacuum", "EFEMIonbarRemotePower", "FacilityCDIW", "", "N2ProtectBearingPCW", "N2PickupPin", "CassetteLot", "Interlock", "MotorInterlock", "Vacuum Pump Interlock And Enable Feedback",
+                                                                        "Door", "Pressure", "Leak", "Level", "DSP Cabinet Exhaust Pressure Sensor#1", "DSP Cabinet Leak#1", "Module C Interlock Status", "Module C Door Status", "Heartbeat Interlock Feedback","Process Robot Interlock Interlock And Enable FeedBack"};
+        private List<string> LogicsListStrings = new List<string> { "4-20mA : 0-32767 : 4-40L/Min", "4-20mA : 0-32767 : 0-60PSI", "4-20mA : 0-32767 : 0-10LPM", "4-20mA : 0-32767 : 0-124.5Pa", "4-20mA : 0-32767 : 0-500Pa", "1-5V : 0-32767 : 10-100LPM", "4-20mA : 0-32767 : 0-0.8Mpa", "4~20MA : 0-32767 : 0.2-1.0MΩ·CM", "4~20mA : 0-32767 : -15~150PSI",
+                                                                     "0~5V : 0-32767 : 0-10000RPM", "4~20mA : 0-32767 : 0~4.0L/Min ", "4~20mA : 0-32767 : 0.0~ -101.3KPa", "open:1", "close:1", "interlock:0", "interlock:1", "leak:0", "leak:1", "on:1", "off:1", "alarm:0", "alarm:1",
+                                                                     "level achieved : 0", "level achieved : 1", "overfilled : 0", "overfilled : 1", "normal : 1", "normal : 0", "Up Pos : 1", "Dw Pos : 1", "enalbe:1", "request:1", "ready:1" };
+
+        XElement ToolControl = null;
+        XElement doc = null;
+        TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
         #endregion
+
+        #region Properties
+        Dictionary<string, XElement> HierarchyDic { get; set; } = new Dictionary<string, XElement>();
+        #endregion
+
         public MainWindow()
         {
             InitializeComponent();
-            DataTable dt = new DataTable();
+
+            doc = XElement.Load(Configfilename);
+            ToolControl = doc.FindFirstElement("ToolControl");
+            List<string> ModulesName = new List<string>();
+            string ModuleName = String.Empty;
+
+            foreach (var module in ToolControl.Elements())
+            {
+                ModuleName = module.Attribute("Name").Value;
+                ModulesName.Add(ModuleName);
+                XElement IODefinitionNode = module.FindFirstElement("Property", "AIDefinitions");
+                HierarchyDic.Add((ModuleName + "ax").ToLower(), IODefinitionNode);     // e.g. <systemax,XElement("System/AIDefinitions")>.
+                IODefinitionNode = module.FindFirstElement("Property", "AODefinitions");
+                HierarchyDic.Add((ModuleName + "ay").ToLower(), IODefinitionNode);
+                IODefinitionNode = module.FindFirstElement("Property", "DIDefinitions");
+                HierarchyDic.Add((ModuleName + "dx").ToLower(), IODefinitionNode);
+                IODefinitionNode = module.FindFirstElement("Property", "DODefinitions");
+                HierarchyDic.Add((ModuleName + "dy").ToLower(), IODefinitionNode);
+            }
+
             dt.Columns.Add("Channel", typeof(string));
             dt.Columns.Add("Module", typeof(string));
-            dt.Columns.Add("Component", typeof(string));
+            //dt.Columns.Add("Component", typeof(string));
             dt.Columns.Add("Parameter", typeof(string));
             dt.Columns.Add("Anonym", typeof(string));
             dt.Columns.Add("PhysicalAddress", typeof(string));
             dt.Columns.Add("Logic", typeof(string));
             dt.Columns.Add("DateAdded", typeof(string));
-            dt.Columns["DateAdded"].DefaultValue = DateTime.Now.ToLocalTime();
             dt.Columns.Add("Tag", typeof(string));
             dt.Columns.Add("Comment", typeof(string));
 
-            ds.Tables.Add(dt);
-            ParametersTable.ItemsSource = ds.Tables[0].DefaultView;
+
+            ParametersTable.ItemsSource = TableRowsList;
+
+            view = (ListCollectionView)CollectionViewSource.GetDefaultView(ParametersTable.ItemsSource);
+            //view.SortDescriptions.Add(new SortDescription("Channel", ListSortDirection.Descending));
+            ChannelTypeGrouper grouper = new ChannelTypeGrouper();
+            view.GroupDescriptions.Add(new PropertyGroupDescription("Channel", grouper));
+
             ParametersTable.LoadingRow += new EventHandler<DataGridRowEventArgs>(dataGrid_LoadingRow);
-            //OverwriteXMLFile();
-            //ReadXML();
+            ParametersTable.PreviewKeyDown += dataGrid_PreviewKeyDown;
+            ParametersTable.RowEditEnding += dataGrid_RowEditEnding;
+            ParametersTable.PreparingCellForEdit += dataGrid_PreparingCellForEdit;
+            ParametersTable.CurrentCellChanged += dataGrid_CurrentCellChanging;
+
+            ReadInAutoWordsList();
         }
 
+
+        private void dataGrid_CurrentCellChanging(object sender, EventArgs e)
+        {
+            if (ParametersTable.SelectedItem != null && ParametersTable.SelectedItem != CollectionView.NewItemPlaceholder)
+            {
+                int i = ParametersTable.SelectedIndex;
+                if (i > -1)
+                {
+                    DataGridRow dataGridRow = ParametersTable.ItemContainerGenerator.ContainerFromIndex(i) as DataGridRow;
+                    if (dataGridRow != null)
+                        (ParametersTable.Columns[6].GetCellContent(dataGridRow) as TextBlock).Text = user + " " + DateTime.Now.ToString();
+                }
+            }
+        }
+
+        private void dataGrid_PreparingCellForEdit(object sender, DataGridPreparingCellForEditEventArgs e)
+        {
+            DataGridTemplateColumn col = e.Column as DataGridTemplateColumn;
+            if (col != null)
+            {
+                ContentPresenter contentPresenter = e.EditingElement as ContentPresenter;
+                DataTemplate editingTemplate = contentPresenter.ContentTemplate;
+                AutoCompleteBox ComponentsAutoBox = editingTemplate.FindName("ComponentAutoCompleteBox", contentPresenter) as AutoCompleteBox;
+                //if(ComponentsAutoBox != null)
+                //{
+                //    ComponentsAutoBox.ItemsSource = ComponentsListStrings;
+                //    Keyboard.Focus(ComponentsAutoBox);
+                //    ComponentsAutoBox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                //} 
+                //else
+                //{
+                AutoCompleteBox ParametersAutoBox = editingTemplate.FindName("ParameterAutoCompleteBox", contentPresenter) as AutoCompleteBox;
+                if (ParametersAutoBox != null)
+                {
+                    ParametersAutoBox.ItemsSource = ParametersListStrings;
+                    Keyboard.Focus(ParametersAutoBox);
+                    ParametersAutoBox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                }
+                else
+                {
+                    AutoCompleteBox LogicsAutoBox = editingTemplate.FindName("LogicAutoCompleteBox", contentPresenter) as AutoCompleteBox;
+                    if (LogicsAutoBox != null)
+                        LogicsAutoBox.ItemsSource = LogicsListStrings;
+                    else
+                    {
+                        AutoCompleteBox ChannelsAutoBox = editingTemplate.FindName("ChannelAutoCompleteBox", contentPresenter) as AutoCompleteBox;
+                        if (ChannelsAutoBox != null)
+                            ChannelsAutoBox.ItemsSource = ChannelsListStrings;
+                        else
+                        {
+                            AutoCompleteBox ModulesAutoBox = editingTemplate.FindName("ModuleAutoCompleteBox", contentPresenter) as AutoCompleteBox;
+                            if (ModulesAutoBox != null)
+                                ModulesAutoBox.ItemsSource = ModulesListStrings;
+                        }
+
+                    }
+                }
+                //} 
+            }
+        }
+
+        private void ReadInAutoWordsList()
+        {
+            StreamReader sr = new StreamReader(AutoWordsFile);
+            string line;
+            while ((line = sr.ReadLine()) != null)
+            {
+                if(!String.IsNullOrEmpty(line))
+                    ParametersListStrings.Add(textInfo.ToTitleCase(line.Trim()));
+            }
+        }
+
+        private static object GetCellValue(DataGridCellInfo cell)
+        {
+            var boundItem = cell.Item;
+            var binding = new Binding();
+            if (cell.Column is DataGridTextColumn)
+            {
+                binding
+                  = ((DataGridTextColumn)cell.Column).Binding
+                        as Binding;
+            }
+            else if (cell.Column is DataGridCheckBoxColumn)
+            {
+                binding
+                  = ((DataGridCheckBoxColumn)cell.Column).Binding
+                        as Binding;
+            }
+            else if (cell.Column is DataGridComboBoxColumn)
+            {
+                binding
+                    = ((DataGridComboBoxColumn)cell.Column).SelectedValueBinding
+                         as Binding;
+
+                if (binding == null)
+                {
+                    binding
+                      = ((DataGridComboBoxColumn)cell.Column).SelectedItemBinding
+                           as Binding;
+                }
+            }
+
+            if (binding != null)
+            {
+                var propertyName = binding.Path.Path;
+                var propInfo = boundItem.GetType().GetProperty(propertyName);
+                return propInfo.GetValue(boundItem, new object[] { });
+            }
+
+            return null;
+        }
 
         private void dataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
@@ -70,26 +226,31 @@ namespace ComprehensiveHardwareInventory
 
         private void dataGrid_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-           
-            if (this.ParametersTable.SelectedItem != null)
+
+            if (ParametersTable.SelectedItem != null)
             {
                 (sender as DataGrid).RowEditEnding -= dataGrid_RowEditEnding;
                 (sender as DataGrid).CommitEdit();
+                if (ParametersTable.SelectedItem == CollectionView.NewItemPlaceholder)
+                {
+                    int i = ParametersTable.SelectedIndex == 0 ? 1 : ParametersTable.SelectedIndex;
+                    ItemRow row = ParametersTable.Items.GetItemAt(i - 1) as ItemRow;
+                    if (row != null && row.Parameter != null && row.Parameter.IndexOf("Shroud") >= 0)
+                    {
+                        row.Tag = "X";
+                        ParametersTable.SelectedItem = row;
+                        (sender as DataGrid).CommitEdit();
+                    }
+                }
                 (sender as DataGrid).Items.Refresh();
                 (sender as DataGrid).RowEditEnding += dataGrid_RowEditEnding;
             }
 
-            DataRow dgRow = (DataRow)((DataRowView)e.Row.Item).Row;
-            //ds.Tables[0].Rows.Add(dgRow);
         }
 
         #region private methods
 
         //Common helper methods
-        private void GetXMLHierachy()
-        {
-            
-        }
 
         private List<string> RowToList(object[] array)
         {
@@ -101,46 +262,90 @@ namespace ComprehensiveHardwareInventory
             }
             return result;
         }
-        private void OnClickGenerateXML(object sender, RoutedEventArgs e)
-        {
-            GetXMLHierachy();
-            //MoveMotorOperation(1, true);
-        }
 
-        private void OnClickSaveToXML(object sender, RoutedEventArgs e)
-        {
-            GetXMLHierachy();
-            //MoveMotorOperation(1, true);
-        }
-        
 
-        private void OnClickSaveToExcel(object sender, RoutedEventArgs e)
+        private void OnClickSaveToNewExcel(object sender, RoutedEventArgs e)
         {
-            if (ds.Tables[0].Rows.Count > 0)
+            ConvertToDataTable(TableRowsList);
+            if (IsExcelLoaded)
             {
                 string filename = Tools.SaveExcelFileDialog();
                 if (filename.Length > 0)
                 {
-                    NPOIHelper.ExportDataTableToExcel(ds.Tables[0], filename);
+                    if (NPOIHelper.ExportDataTableToExcel(dt, filename).Item1)
+                        MessageBox.Show("successfully save to excel file");
+                    else
+                        MessageBox.Show("Save failed! check again");
+
                 }
-            }      
+            }
+            else if (TableRowsList.Count > 0)
+            {
+                string filename = Tools.SaveExcelFileDialog();
+                if (filename.Length > 0)
+                {
+                    NPOIHelper.ExportDataTableToExcel(dt, filename);
+                    MessageBox.Show("successfully save to excel file");
+                }
+            }
             else
             {
                 MessageBox.Show("table is empty! Try again.");
             }
-            
+
         }
-        
+
+
+        private void OnClickIOType(object sender, RoutedEventArgs e)
+        {
+            currentIOView = (sender as MenuItem).Header.ToString();
+            ParametersTable.ItemsSource = null;
+            ParametersTable.ItemsSource = TableRowsList;
+            ListCollectionView view1 = (ListCollectionView)CollectionViewSource.GetDefaultView(ParametersTable.ItemsSource);
+            //view1.SortDescriptions.Add(new SortDescription("Channel", ListSortDirection.Ascending));
+            view1.Filter = new Predicate<object>(item => ((ItemRow)item).Channel.ToUpper().Contains(currentIOView));
+        }
+
+        private void OnClickDeleteRow(object sender, RoutedEventArgs e)
+        {
+            if (ParametersTable.SelectedItem != null && ParametersTable.SelectedItem != CollectionView.NewItemPlaceholder)
+            {
+                int i = ParametersTable.SelectedIndex;
+                ItemRow itemRow = (ItemRow)ParametersTable.SelectedItem;
+                if (itemRow != null && itemRow.Channel != null)
+                    TableRowsList.Remove(itemRow);
+            }
+        }
+
+        private void OnClickNormalView(object sender, RoutedEventArgs e)
+        {
+            ConvertToDataTable(TableRowsList);
+            TableRowsList = ConvertToStringList(dt);
+            ParametersTable.ItemsSource = null;
+            ParametersTable.ItemsSource = TableRowsList;
+            view = (ListCollectionView)CollectionViewSource.GetDefaultView(ParametersTable.ItemsSource);
+            //view.SortDescriptions.Add(new SortDescription("Channel", ListSortDirection.Ascending));
+            ChannelTypeGrouper grouper = new ChannelTypeGrouper();
+            view.GroupDescriptions.Add(new PropertyGroupDescription("Channel", grouper));
+        }
 
         private void OnClickLoadExcel(object sender, RoutedEventArgs e)
         {
-            Tuple<string, DataTable> sheets;
             currentfile = Tools.OpenExcelFileDialog();
             if (currentfile != null && currentfile.Length > 0)
             {
-                sheets = NPOIHelper.ImportExcelToDataTable(currentfile, true);
-                ParametersTable.ItemsSource = sheets.Item2.DefaultView;
+                dt = NPOIHelper.ImportExcelToDataTable(currentfile, true).Item2;
+                //TableRowsList.Clear();
+                TableRowsList = ConvertToStringList(dt);
+                ParametersTable.ItemsSource = null;
+                ParametersTable.ItemsSource = TableRowsList;
+                ICollectionView view = CollectionViewSource.GetDefaultView(ParametersTable.ItemsSource);
+                //view.SortDescriptions.Add(new SortDescription("Channel", ListSortDirection.Ascending));
+                ChannelTypeGrouper grouper = new ChannelTypeGrouper();
+                view.GroupDescriptions.Add(new PropertyGroupDescription("Channel", grouper));
+
                 this.Title = currentfile;
+                IsExcelLoaded = true;
             }
             else
             {
@@ -151,40 +356,35 @@ namespace ComprehensiveHardwareInventory
 
         private void OnClickUpdateToExcel(object sender, RoutedEventArgs e)
         {
-            DataTable dt = ParametersTable.ItemsSource as DataTable;
-
-            Tuple<bool, string> result = NPOIHelper.ExportDataTableToExcel(dt, currentfile);
-            if (result.Item1)
+            if (IsExcelLoaded)
             {
-                MessageBox.Show("Successfully update to excel");
+                dt.Clear();
+                ConvertToDataTable(TableRowsList);
+
+                Tuple<bool, string> result = NPOIHelper.ExportDataTableToExcel(dt, currentfile);
+                if (result.Item1)
+                {
+                    MessageBox.Show("Successfully update to excel");
+                }
+                else
+                {
+                    MessageBox.Show("Fail to update to excel! Check again.");
+                }
             }
             else
             {
-                MessageBox.Show("Fail to update to excel! Check again.");
+                MessageBox.Show("table is not loaded! Try again.");
             }
         }
 
         // Manipulate XML
-        private void WriteXMLNode(string rootNode, double Xvalue, double Zvalue)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(TableToXMLFileName);
-            XmlNode root = doc.DocumentElement;
-            XmlNode Position = root.SelectSingleNode(rootNode);
-            XmlNode XPosition = Position.SelectSingleNode("XPosition");
-            XPosition.InnerText = Xvalue.ToString();
-            XmlNode ZPosition = Position.SelectSingleNode("ZPosition");
-            ZPosition.InnerText = Zvalue.ToString();
-            doc.Save(persistenFileName);
-        }
-
         private void WriteXML(List<string> rowlist)
         {
             XElement doc = XElement.Load(Configfilename);
             XElement System = doc.FindFirstElement("Group", "System");
             XElement ChamA1 = doc.FindFirstElement("Group", "A1");
             XElement ChamA2 = doc.FindFirstElement("Group", "A2");
-            XElement ChamB1= doc.FindFirstElement("Group", "B1");
+            XElement ChamB1 = doc.FindFirstElement("Group", "B1");
             XElement ChamB2 = doc.FindFirstElement("Group", "B2");
             XElement ModuleNode = null;
             XElement NewIONode = null;
@@ -214,7 +414,7 @@ namespace ComprehensiveHardwareInventory
                     {
                         NewIONode = MakeAnalogElement(rowlist);
                         IOListNode = ModuleNode.FindFirstElement("Property", "AIDefinitions");
-                    } 
+                    }
                     break;
                 case "AY":
                     {
@@ -226,20 +426,20 @@ namespace ComprehensiveHardwareInventory
                     {
                         NewIONode = MakeDigitalElement(rowlist[0], rowlist[3]);
                         IOListNode = ModuleNode.FindFirstElement("Property", "DIDefinitions");
-                    } 
+                    }
                     break;
                 case "DY":
                     {
                         NewIONode = MakeDigitalElement(rowlist[0], rowlist[3]);
                         IOListNode = ModuleNode.FindFirstElement("Property", "DODefinitions");
-                    } 
+                    }
                     break;
             }
 
-            if(IOListNode != null)
+            if (IOListNode != null)
             {
                 bool IsFound = false;
-                foreach(var item in IOListNode.Elements())
+                foreach (var item in IOListNode.Elements())
                 {
                     if (item.Element("Index").Value == NewIONode.Element("Index").Value && item.Element("Name").Value != NewIONode.Element("Name").Value)
                     {
@@ -248,7 +448,7 @@ namespace ComprehensiveHardwareInventory
                         break;
                     }
                 }
-                if(!IsFound)
+                if (!IsFound)
                     IOListNode.Add(NewIONode);
             }
             doc.Save(Configfilename);
@@ -274,36 +474,33 @@ namespace ComprehensiveHardwareInventory
         private XElement MakeAnalogElement(List<string> list)
         {
             string Unit;
-            string PhysicalMin = "0";
-            string PhysicalMax = "32767";
+            string PhysicalMin;
+            string PhysicalMax;
             string LogicalMin = String.Empty;
             string LogicalMax = String.Empty;
             string LogicOffset = "0";
-            string Name = list[3];
+            string Name = list[2];
 
-            if (list[3].Contains("Temperature"))
+            if (list[5].Trim() == "/10")
             {
                 Unit = "C";
-                if (list[6].Trim() == "/10")
-                {
-                    LogicalMax = "100";
-                    LogicalMin = "0";
-                    PhysicalMax = "1000";
-                }
+                LogicalMax = "100";
+                LogicalMin = "0";
+                PhysicalMax = "1000";
+                PhysicalMin = "0";
             }
             else
             {
-                string[] RangeItems = list[6].Split(':');
-                //if (RangeItems[0].Trim().Contains(""))   // if it's half range, use 16383
-                //{
-                //    PhysicalMax = "16383";
-                //}
-                string[] logicalItems = RangeItems[1].Trim().Split('-');
+                string[] RangeItems = list[5].Split(':');           //e.g. list[5] is 4-20mA:0-32767:0-4.0L/Min
+                string[] physicalItems = RangeItems[1].Trim().Split('-');
+                PhysicalMax = physicalItems[1].Trim();
+                PhysicalMin = physicalItems[0].Trim();
+                string[] logicalItems = RangeItems[2].Trim().Split('-');
                 LogicalMin = logicalItems[0].Trim();
                 LogicalMax = Regex.Replace(logicalItems[1], "[a-z]", "", RegexOptions.IgnoreCase);
-                Unit = logicalItems[1].Replace(LogicalMax,"");
+                Unit = logicalItems[1].Replace(LogicalMax, "");
             }
-            string AnalogDirection = list[0].Substring(0,2).ToUpper() == "AX" ? "AnaInCell" : "AnaOutCell";
+            string AnalogDirection = list[0].Substring(0, 2).ToUpper() == "AX" ? "AnaInCell" : "AnaOutCell";
             int indexInt = int.Parse(list[0].Substring(2));
             XElement result = new XElement(AnalogDirection,
                                         new XElement("Index", indexInt),
@@ -345,115 +542,78 @@ namespace ComprehensiveHardwareInventory
         }
 
 
-        private void ReadXML()
+        private void OnClickUpdateConfig(object sender, RoutedEventArgs e)     // This will only update the list, not delete all, change a node if it has already there. 
         {
-            XElement fromFile = XElement.Load(Configfilename); 
-        }
-
-        private void OnClickSaveToConfig(object sender, RoutedEventArgs e)     // This will only update the list, not delete all, change a node if it has already there. 
-        {
-
-            XElement doc = XElement.Load(Configfilename);
-            XElement ToolControl = doc.FindFirstElement("ToolControl");
-            IEnumerable<XElement> ModuleList = ToolControl.Elements();
-
-            Dictionary<string, XElement> HierarchyDic = new Dictionary<string, XElement>();
-                   
-            foreach(var module in ToolControl.Elements())
-            {
-                XElement IODefinitionNode = module.FindFirstElement("Property", "AIDefinitions");
-                HierarchyDic.Add((module.Attribute("Name").Value + "ax").ToLower(), IODefinitionNode);     // e.g. <systemax,XElement("System/AIDefinitions")>.
-                IODefinitionNode = module.FindFirstElement("Property", "AODefinitions");
-                HierarchyDic.Add((module.Attribute("Name").Value + "ay").ToLower(), IODefinitionNode);
-                IODefinitionNode = module.FindFirstElement("Property", "DIDefinitions");
-                HierarchyDic.Add((module.Attribute("Name").Value + "dx").ToLower(), IODefinitionNode);
-                IODefinitionNode = module.FindFirstElement("Property", "DODefinitions");
-                HierarchyDic.Add((module.Attribute("Name").Value + "dy").ToLower(), IODefinitionNode);
-            }
-
-            XElement ModuleNode = null;
+            //XElement ModuleNode = null;
             XElement NewIONode = null;
             XElement IOListNode = null;
-            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
 
             foreach (var row in ParametersTable.ItemsSource)
             {
-                DataRow r = ((DataRowView)row).Row;
-                List<string> list = RowToList(r.ItemArray);
+                ItemRow r = (ItemRow)row;
+                List<string> list = r.ToList();
 
-                ModuleNode = ToolControl.Element(textInfo.ToTitleCase(list[1]));
-                
-                string IOType = list[0].Substring(0, 2).ToUpper();
-                switch (IOType)
-                {
-                    case "DX":
-                    case "DY":
-                        NewIONode = MakeDigitalElement(list[0], list[3]);
-                        break;
-                    case "AX":
-                    case "AY":
-                        NewIONode = MakeAnalogElement(list);
-                        break;
-                    default:
-                        MessageBox.Show("IO index {0} is wrong! check again.", list[0]);
-                        return;
-                }
-                IOListNode = HierarchyDic[(list[1].Trim() + list[0].Trim().Substring(0,2)).ToLower()];   // e.g. "System" + "Ax"  => systemax .
+                //ModuleNode = ToolControl.Element(textInfo.ToTitleCase(list[1]));
 
-                if (IOListNode != null)
+                if (r.Channel != null && r.Channel.Length > 2)
                 {
-                    bool IsFound = false;
-                    foreach (var item in IOListNode.Elements())
+                    string IOType = list[0].Substring(0, 2).ToUpper();
+                    switch (IOType)
                     {
-                        if (item.Element("Index").Value == NewIONode.Element("Index").Value && item.Element("Name").Value != NewIONode.Element("Name").Value)
-                        {
-                            IsFound = true;
-                            item.ReplaceAll(NewIONode.Elements());
+                        case "DX":
+                        case "DY":
+                            NewIONode = MakeDigitalElement(list[0], list[3]);
                             break;
-                        }
+                        case "AX":
+                        case "AY":
+                            NewIONode = MakeAnalogElement(list);
+                            break;
+                        default:
+                            MessageBox.Show("IO index {0} is wrong! check again.", list[0]);
+                            return;
                     }
-                    if (!IsFound)
-                        IOListNode.Add(NewIONode);
+                    IOListNode = HierarchyDic[(list[1].Trim() + list[0].Trim().Substring(0, 2)).ToLower()];   // e.g. "System" + "Ax"  => systemax .
+
+                    if (IOListNode != null)
+                    {
+                        foreach (var item in IOListNode.Elements())
+                        {
+                            if (item.Element("Index").Value == NewIONode.Element("Index").Value && item.Element("Name").Value != NewIONode.Element("Name").Value)
+                            {
+                                item.ReplaceAll(NewIONode.Elements());
+                                break;
+                            }
+                            else if (int.Parse(item.Element("Index").Value) > int.Parse(NewIONode.Element("Index").Value))
+                            {
+                                item.AddBeforeSelf(NewIONode);
+                                break;
+                            }
+                        }
+
+                    }
                 }
             }
-            
+
             doc.Save(Configfilename);
+            MessageBox.Show("Successfully update to xml config!");
         }
 
         private void OnClickOverwriteConfig(object sender, RoutedEventArgs e)   // This will delete all the IO list and then add from the beginning.
         {
-            XElement doc = XElement.Load(Configfilename);
-            XElement ToolControl = doc.FindFirstElement("ToolControl");
-            IEnumerable<XElement> ModuleList = ToolControl.Elements();
-
-            Dictionary<string, XElement> HierarchyDic = new Dictionary<string, XElement>();
-
-            foreach (var module in ToolControl.Elements())
-            {
-                XElement IODefinitionNode = module.FindFirstElement("Property", "AIDefinitions");
-                HierarchyDic.Add((module.Attribute("Name").Value + "ax").ToLower(), IODefinitionNode);     // e.g. <systemax,XElement("System/AIDefinitions")>.
-                IODefinitionNode = module.FindFirstElement("Property", "AODefinitions");
-                HierarchyDic.Add((module.Attribute("Name").Value + "ay").ToLower(), IODefinitionNode);
-                IODefinitionNode = module.FindFirstElement("Property", "DIDefinitions");
-                HierarchyDic.Add((module.Attribute("Name").Value + "dx").ToLower(), IODefinitionNode);
-                IODefinitionNode = module.FindFirstElement("Property", "DODefinitions");
-                HierarchyDic.Add((module.Attribute("Name").Value + "dy").ToLower(), IODefinitionNode);
-            }
             foreach (var item in HierarchyDic.Values)              // Here is the differences with the OnClickSaveToConfig method, only this loop.
             {
                 item.RemoveAll();
             }
-            XElement ModuleNode = null;
+            //XElement ModuleNode = null;
             XElement NewIONode = null;
             XElement IOListNode = null;
-            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
 
             foreach (var row in ParametersTable.ItemsSource)
             {
                 DataRow r = ((DataRowView)row).Row;
                 List<string> list = RowToList(r.ItemArray);
 
-                ModuleNode = ToolControl.Element(textInfo.ToTitleCase(list[1]));
+                //ModuleNode = ToolControl.Element(textInfo.ToTitleCase(list[1]));
 
                 string IOType = list[0].Substring(0, 2).ToUpper();
                 switch (IOType)
@@ -490,47 +650,221 @@ namespace ComprehensiveHardwareInventory
             }
 
             doc.Save(Configfilename);
+            MessageBox.Show("Successfully update to xml config!");
+        }
+
+        private static DataGridCell GetCell(DataGrid dataGrid, DataGridRow rowContainer, int column)
+        {
+            if (rowContainer != null)
+            {
+                DataGridCellsPresenter presenter = FindVisualChild<DataGridCellsPresenter>(rowContainer);
+                if (presenter != null)
+                    return presenter.ItemContainerGenerator.ContainerFromIndex(column) as DataGridCell;
+            }
+
+            return null;
+        }
+
+        private static T FindVisualChild<T>(DependencyObject obj) where T : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(obj, i);
+                if (child != null && child is T)
+                    return (T)child;
+                else
+                {
+                    T childOfChild = FindVisualChild<T>(child);
+                    if (childOfChild != null)
+                        return childOfChild;
+                }
+            }
+            return null;
+        }
+
+        private void dataGrid_PreviewKeyDown(object sender, KeyEventArgs e)  // This will set focus on first column of the new unedited row
+        {                                                                    // This is very hard to achieved since the cell in the new row wouldn't be created yet.
+            DataGrid grid = (DataGrid)sender;
+
+            if (e.Key == Key.Enter || e.Key == Key.Return)
+            {
+                DataGridRow row = ParametersTable.ItemContainerGenerator.ContainerFromItem(CollectionView.NewItemPlaceholder) as DataGridRow;
+                if (row != null)
+                {
+                    if (row.GetIndex() == ParametersTable.SelectedIndex + 1)
+                    {
+                        ParametersTable.SelectedItem = row.DataContext;
+                        DataGridCell cell = GetCell(ParametersTable, row, 0);
+                        if (cell != null)
+                        {
+                            ParametersTable.CurrentCell = new DataGridCellInfo(cell);
+                            ParametersTable.BeginEdit();       // make the newly empty place holder into edit mode.
+
+                        }
+                    }
+                    else
+                    {
+                        DataGridCell cell = GetCell(ParametersTable, ParametersTable.SelectedItem as DataGridRow, 0);
+                        if (cell != null)
+                        {
+                            ParametersTable.CurrentCell = new DataGridCellInfo(cell);
+                            ParametersTable.BeginEdit();       // make the newly empty place holder into edit mode.
+
+                        }
+                    }
+                }
+
+            }
         }
         #endregion
-    }
 
-    public class RowObject
-    {
-        public string IOIndex;
-        public string NameFunction;
-        public string Anonym;
-        public string Logic;
-    }
-
-    [Serializable]
-    public class RbtPosition
-    {
-        [XmlElement(ElementName = "XPosition")]
-        public double x;
-        [XmlElement(ElementName = "ZPosition")]
-        public double z;
-        public RbtPosition(double X, double Z) { this.x = X; this.z = Z; }
-        public RbtPosition() { }
-    }
-
-    [Serializable]
-    public class RbtPositions
-    {
-        [XmlElement(ElementName = "LoadPosition")]
-        public RbtPosition LoadPosition { get; set; }
-        [XmlElement(ElementName = "UnloadPosition")]
-        public RbtPosition UnloadPosition { get; set; }
-        [XmlElement(ElementName = "SPMPosition")]
-        public RbtPosition SPMPosition { get; set; }
-        [XmlElement(ElementName = "QDRPosition")]
-        public RbtPosition QDRPosition { get; set; }
-        public RbtPositions() { }
-        public RbtPositions(RbtPosition LoadPos, RbtPosition UnloadPos, RbtPosition SPMPos, RbtPosition QDRPos)
+        private void OnClickNew(object sender, RoutedEventArgs e)
         {
-            LoadPosition = LoadPos;
-            UnloadPosition = UnloadPos;
-            SPMPosition = SPMPos;
-            QDRPosition = QDRPos;
+            IsExcelLoaded = false;
+            dt.Rows.Clear();
+            TableRowsList.Clear();
+            this.Title = "No file is loaded";
+        }
+
+        public static ObservableCollection<ItemRow> ConvertToStringList(DataTable table)
+        {
+            if (table == null)
+            {
+                return null;
+            }
+            ObservableCollection<ItemRow> result = new ObservableCollection<ItemRow>();
+            string s = String.Empty;
+            foreach (DataRow row in table.Rows)
+            {
+                ItemRow itemrow = new ItemRow(row.ItemArray[0].ToString(), row.ItemArray[1].ToString(), row.ItemArray[2].ToString(), row.ItemArray[3].ToString(), row.ItemArray[4].ToString(), row.ItemArray[5].ToString(), row.ItemArray[6].ToString(), row.ItemArray[7].ToString(), row.ItemArray[8].ToString());
+
+                result.Add(itemrow);
+            }
+
+            return result;
+        }
+
+        public static DataTable ConvertToDataTable(ObservableCollection<ItemRow> rowlist)
+        {
+            if (rowlist.Count == 0)
+            {
+                return null;
+            }
+            string s = String.Empty;
+            dt.Clear();                           // Or we can create another datatable here and then merge with dt.
+            foreach (var row in rowlist.ToArray())
+            {
+                if (!String.IsNullOrEmpty(row.Channel))
+                {
+                    DataRow dtrow = dt.NewRow();
+                    dtrow[0] = row.Channel;
+                    dtrow[1] = row.Module;
+                    //dtrow[2] = row.Component;
+                    dtrow[3] = row.Parameter;
+                    dtrow[4] = row.Anonym;
+                    dtrow[5] = row.PhysicalAddress;
+                    dtrow[6] = row.Logic;
+                    dtrow[7] = row.DateAdded;
+                    dtrow[8] = row.Tag;
+                    dtrow[9] = row.Comment;
+                    dt.Rows.Add(dtrow);
+                }
+            }
+
+            return dt;
+        }
+
+        private void OnClickAddAutoWords(object sender, RoutedEventArgs e)
+        {
+            //FileStream fs = new FileStream(AutoWordsFile, FileMode.Append);
+            //string filename = Tools.SaveExcelFileDialog();
+            System.Diagnostics.Process.Start("notepad.exe", AutoWordsFile);
         }
     }
+
+    public class ItemRow
+    {
+        public string Channel { get; set; }
+        public string Module { get; set; }
+        //public string Component { get; set; }
+        public string Parameter { get; set; }
+        public string Anonym { get; set; }
+        public string PhysicalAddress { get; set; }
+        public string Logic { get; set; }
+        public string DateAdded { get; set; }
+        public string Tag { get; set; }
+        public string Comment { get; set; }
+        public ItemRow(string channel, string module, string parameter, string anonym, string physicaladdress, string logic, string dateadded, string tag, string comment)
+        {
+            Channel = channel;
+            Module = module;
+            //Component = component;
+            Parameter = parameter;
+            Anonym = anonym;
+            PhysicalAddress = physicaladdress;
+            Logic = logic;
+            DateAdded = dateadded;
+            Tag = tag;
+            Comment = comment;
+        }
+        public ItemRow() { }
+        public List<string> ToList()
+        {
+            List<string> result = new List<string> { Channel ?? "", Module ?? "", Parameter ?? "", Anonym ?? "", PhysicalAddress ?? "", Logic ?? "", DateAdded ?? "", Tag ?? "", Channel ?? "" };
+            return result;
+        }
+    }
+
+    public class ChannelTypeGrouper : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+            else
+            {
+                string s = value.ToString();
+                if (!String.IsNullOrEmpty(s))
+                {
+                    if (s.Length > 2)
+                    {
+                        string s2 = s.Substring(0, 2).ToUpper();
+                        switch (s2)
+                        {
+                            case "AX":
+                            case "AY":
+                            case "DX":
+                            case "DY":
+                                return String.Format(culture, s2);
+                        }
+                    }
+                }
+                return "Error";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException("This converter is for grouping only");
+        }
+    }
+
+    public class AutoCompleteFocusableBox : AutoCompleteBox
+    {
+        public override void OnApplyTemplate()
+        {
+            base.OnApplyTemplate();
+            var textbox = Template.FindName("Text", this) as TextBox;
+            if (textbox != null) textbox.Focus();
+        }
+
+        public new void Focus()
+        {
+            var textbox = Template.FindName("Text", this) as TextBox;
+            if (textbox != null) textbox.Focus();
+        }
+    }
+
 }

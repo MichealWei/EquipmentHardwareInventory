@@ -4,10 +4,21 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ComprehensiveHardwareInventory"
+        xmlns:toolkit="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Input.Toolkit"
         mc:Ignorable="d"
+        
     Title="MainWindow" Height="850" Width="1200">
+    <Window.Resources>
+        <RoutedUICommand x:Key="ClickCommand" Text="Text" />
+    </Window.Resources>
+    <Window.CommandBindings>
+        <CommandBinding Command="{StaticResource ClickCommand}" 
+                    Executed="OnClickDeleteRow" />
+    </Window.CommandBindings>
+    <Window.InputBindings>
+        <KeyBinding Key="D" Modifiers="Ctrl" Command="{StaticResource ClickCommand}" />
+    </Window.InputBindings>
 
-    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"></RowDefinition>
@@ -15,37 +26,37 @@
         </Grid.RowDefinitions>
         <Menu Height="20">
             <MenuItem Header="File">
+                <Button Content="New" Click="OnClickNew"></Button>
+                <Separator></Separator>
                 <MenuItem Header="LoadExcel" Click="OnClickLoadExcel"></MenuItem>
-                <MenuItem Header="SaveToExcel" Click="OnClickSaveToExcel"></MenuItem>
+                <MenuItem Header="SaveToNewExcel" Click="OnClickSaveToNewExcel"></MenuItem>
                 <MenuItem Header="UpdateToExcel" Click="OnClickUpdateToExcel"></MenuItem>
+                <Separator></Separator>
                 <MenuItem Header="OverwriteConfig" Click="OnClickOverwriteConfig"></MenuItem>
-                <MenuItem Header="SaveToConfig" Click="OnClickSaveToConfig"></MenuItem>
+                <MenuItem Header="UpdateConfig" Click="OnClickUpdateConfig"></MenuItem>
+                <Separator></Separator>
+                <MenuItem Header="AddAutoWords" Click="OnClickAddAutoWords"/>
             </MenuItem>
             <MenuItem Header="Edit">
-                <MenuItem Header="Undo"></MenuItem>
-                <MenuItem Header="Redo"></MenuItem>
+                <MenuItem Header="DeleteRow : Ctrl-D" Command="{StaticResource ClickCommand}" />
+                <!--<MenuItem Header="Redo"></MenuItem>
                 <Separator></Separator>
                 <MenuItem Header="Cut"></MenuItem>
                 <MenuItem Header="Copy"></MenuItem>
-                <MenuItem Header="Paste"></MenuItem>
+                <MenuItem Header="Paste"></MenuItem>-->
             </MenuItem>
             <MenuItem Header="View">
-                <MenuItem Header="Hierachy">
-                    <MenuItem Header="System">
-                        <MenuItem Header="A"></MenuItem>
-                        <MenuItem Header="B"></MenuItem>
-                        <MenuItem Header="C"></MenuItem>
-                        <MenuItem Header="D"></MenuItem>
-                        <MenuItem Header="E"></MenuItem>
-                        <MenuItem Header="F"></MenuItem>
-                        <MenuItem Header="G"></MenuItem>
-                        <MenuItem Header="H"></MenuItem>
-                        <MenuItem Header="I"></MenuItem>
-                        <MenuItem Header="J"></MenuItem>
-                    </MenuItem>
+                <MenuItem Header="NormalView" Click="OnClickNormalView"/>
+                <!--<MenuItem Header="Hierachy" x:Name="HierachyMenu" ItemsSource="{Binding}">
+                </MenuItem>-->
+                <MenuItem x:Name="IOTypeMenu" Header="IOType">
+                    <MenuItem Header="AX" Click="OnClickIOType"/>
+                    <MenuItem Header="AY" Click="OnClickIOType"/>
+                    <MenuItem Header="DX" Click="OnClickIOType"/>
+                    <MenuItem Header="DY" Click="OnClickIOType"/>
                 </MenuItem>
             </MenuItem>
-            <MenuItem Header="PowerEdit">
+            <!--<MenuItem Header="PowerEdit">
                 <MenuItem Header="Components">
                     <MenuItem Header="Valves"></MenuItem>
                     <MenuItem Header="Sensors"></MenuItem>
@@ -54,9 +65,43 @@
                     <MenuItem Header="CDS/CDU"></MenuItem>
                     <MenuItem Header="Chemical"></MenuItem>
                 </MenuItem>
-            </MenuItem>
+            </MenuItem>-->
         </Menu>
-        <DataGrid Name="ParametersTable" RowEditEnding="dataGrid_RowEditEnding" CanUserAddRows="True" VerticalGridLinesBrush="LightGray" HorizontalGridLinesBrush="LightGray" Grid.Row="2" >
+        <DataGrid Name="ParametersTable" ItemsSource="{Binding}" VerticalGridLinesBrush="LightGray" HorizontalGridLinesBrush="LightGray" Grid.Row="2" AutoGenerateColumns="False">
+            <DataGrid.GroupStyle>
+                <GroupStyle>
+                    <GroupStyle.ContainerStyle>
+                        <Style TargetType="{x:Type GroupItem}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type GroupItem}">
+                                        <Expander IsExpanded="True">
+                                            <Expander.Header >
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Path=Name}" FontWeight="Bold"  Background="LightBlue" />
+                                                    <TextBlock Text=" : " FontWeight="Bold" Background="LightBlue" />
+                                                    <TextBlock Text="{Binding Path=ItemCount}" FontWeight="Bold" Background="LightBlue" />
+                                                </StackPanel>
+                                            </Expander.Header>
+                                            <ItemsPresenter />
+                                        </Expander>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </GroupStyle.ContainerStyle>
+                    <!--<GroupStyle.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Path=Name}" FontWeight="Bold" FontSize="18" Background="LightBlue" />
+                                -->
+                    <!--<TextBlock Text="{Binding Path=ItemCount}" FontWeight="Bold" FontSize="18" Background="Blue" />-->
+                    <!--
+                            </StackPanel>
+                        </DataTemplate>
+                    </GroupStyle.HeaderTemplate>-->
+                </GroupStyle>
+            </DataGrid.GroupStyle>
             <DataGrid.ColumnHeaderStyle>
                 <Style TargetType="DataGridColumnHeader">
                     <Setter Property="FontSize" Value="18" />
@@ -64,7 +109,7 @@
                     <Setter Property="HorizontalAlignment" Value="Center"/>
                 </Style>
             </DataGrid.ColumnHeaderStyle>
-            
+
             <DataGrid.CellStyle>
                 <Style TargetType="DataGridCell">
                     <Setter Property="Template">
@@ -85,28 +130,102 @@
                 </Style>
             </DataGrid.CellStyle>
 
-            <!--<DataGrid.Columns >
-                <DataGridTextColumn Header="Channel" Width="75">
-                </DataGridTextColumn>
-                <DataGridTextColumn Header="Module" Width="95">
-                </DataGridTextColumn>
-                <DataGridTextColumn Header="Component" Width="95">
-                </DataGridTextColumn>
-                <DataGridTextColumn Header="Parameter" Width="175">
-                </DataGridTextColumn>
-                <DataGridTextColumn Header="Anonym"></DataGridTextColumn>
-                <DataGridTextColumn Header="PhysicalAddress"></DataGridTextColumn>
-                <DataGridComboBoxColumn Header="Logic" Width="135"></DataGridComboBoxColumn>
-
-                <DataGridTemplateColumn Header="Date Added" Width="95">
+            <DataGrid.Columns >
+                <!--<DataGridTextColumn Header="Channel" Binding="{Binding Channel, Mode=TwoWay}" />-->
+                <DataGridTemplateColumn Header="Channel" x:Name="ChannelAutoCol">
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate >
+                            <local:AutoCompleteFocusableBox IsTextCompletionEnabled="True" FilterMode="StartsWith" ItemsSource="{Binding}" x:Name="ChannelAutoCompleteBox" Width="Auto" Text="{Binding Channel, Mode=TwoWay}" >
+                            </local:AutoCompleteFocusableBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Channel, Mode=TwoWay}"></TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Header="Tag" Width="95">
+                <!--<DataGridComboBoxColumn Header="Module" x:Name="ModuleComboNames"  SelectedValueBinding="{Binding Module}"/>-->
+
+                <DataGridTemplateColumn Header="Module" x:Name="ModuleAutoCol">
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate >
+                            <local:AutoCompleteFocusableBox IsTextCompletionEnabled="True" FilterMode="StartsWith" ItemsSource="{Binding}" x:Name="ModuleAutoCompleteBox" Width="Auto" Text="{Binding Module, Mode=TwoWay}" >
+                            </local:AutoCompleteFocusableBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Module, Mode=TwoWay}"></TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Comment" Width="95">
+                <!--<DataGridTemplateColumn Header="Component" x:Name="ComponentAutoCol">
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate >
+                            <local:AutoCompleteFocusableBox IsTextCompletionEnabled="True" FilterMode="StartsWith" ItemsSource="{Binding}" x:Name="ComponentAutoCompleteBox" Width="Auto" Text="{Binding Component, Mode=TwoWay}" >
+                            </local:AutoCompleteFocusableBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Component, Mode=TwoWay}"></TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>-->
+                <!--<DataGridTextColumn Header="Component" Binding="{Binding Component, Mode=TwoWay}" >
+                </DataGridTextColumn>-->
+                <DataGridTemplateColumn Header="Parameter" x:Name="ParameterAutoCol">
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate >
+                            <local:AutoCompleteFocusableBox IsTextCompletionEnabled="True" FilterMode="Contains" ItemsSource="{Binding}" x:Name="ParameterAutoCompleteBox" Width="Auto" Text="{Binding Parameter, Mode=TwoWay}" >
+                            </local:AutoCompleteFocusableBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Parameter, Mode=TwoWay}"></TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <!--<DataGridTextColumn Header="Parameter" Binding="{Binding Parameter, Mode=TwoWay}" >
+                </DataGridTextColumn>-->
+                <DataGridTextColumn Header="Anonym" Binding="{Binding Anonym, Mode=TwoWay}"></DataGridTextColumn>
+                <DataGridTextColumn Header="PhysicalAddress" Binding="{Binding PhysicalAddress, Mode=TwoWay}"></DataGridTextColumn>
+                <!--<DataGridTextColumn Header="Logic" Binding="{Binding Logic, Mode=TwoWay}" ></DataGridTextColumn>-->
+                <DataGridTemplateColumn Header="Logic" x:Name="LogicAutoCol">
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate >
+                            <local:AutoCompleteFocusableBox IsTextCompletionEnabled="True" FilterMode="StartsWith" ItemsSource="{Binding}" x:Name="LogicAutoCompleteBox" Width="Auto" Text="{Binding Logic, Mode=TwoWay}" >
+                            </local:AutoCompleteFocusableBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Logic, Mode=TwoWay}"></TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-            </DataGrid.Columns>-->
+                <DataGridTextColumn Header="Date Added" Binding="{Binding DateAdded, Mode=TwoWay}" />
+                <DataGridTextColumn Header="Tag" Binding="{Binding Tag, Mode=TwoWay}" />
+                <DataGridTextColumn Header="Comment" Binding="{Binding Comment, Mode=TwoWay}" />
+
+            </DataGrid.Columns>
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="LightGray"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="LightGray"/>
+                            <Setter Property="Foreground" Value="Red"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
         </DataGrid>
     </Grid>
 </Window>
