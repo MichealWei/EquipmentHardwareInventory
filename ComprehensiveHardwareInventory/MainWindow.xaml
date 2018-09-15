@@ -35,7 +35,9 @@
                 <MenuItem Header="OverwriteConfig" Click="OnClickOverwriteConfig"></MenuItem>
                 <MenuItem Header="UpdateConfig" Click="OnClickUpdateConfig"></MenuItem>
                 <Separator></Separator>
-                <MenuItem Header="AddAutoWords" Click="OnClickAddAutoWords"/>
+                <MenuItem Header="AddParametersWords" Click="OnClickAddAutoWords"/>
+                <MenuItem Header="AddLogicWords" Click="OnClickAddAutoWords"/>
+                <MenuItem Header="AddModuleWords" Click="OnClickAddAutoWords"/>
             </MenuItem>
             <MenuItem Header="Edit">
                 <MenuItem Header="DeleteRow : Ctrl-D" Command="{StaticResource ClickCommand}" />
@@ -47,8 +49,7 @@
             </MenuItem>
             <MenuItem Header="View">
                 <MenuItem Header="NormalView" Click="OnClickNormalView"/>
-                <!--<MenuItem Header="Hierachy" x:Name="HierachyMenu" ItemsSource="{Binding}">
-                </MenuItem>-->
+                <MenuItem Header="Hierachy" x:Name="HierachyMenu" ItemsSource="{Binding}" Click="OnClickModuleType"/>
                 <MenuItem x:Name="IOTypeMenu" Header="IOType">
                     <MenuItem Header="AX" Click="OnClickIOType"/>
                     <MenuItem Header="AY" Click="OnClickIOType"/>
@@ -217,10 +218,10 @@
                 <Style TargetType="DataGridRow">
                     <Style.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="LightGray"/>
+                            <Setter Property="Background" Value="LightGreen"/>
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="LightGray"/>
+                            <Setter Property="Background" Value="LightGreen"/>
                             <Setter Property="Foreground" Value="Red"/>
                         </Trigger>
                     </Style.Triggers>

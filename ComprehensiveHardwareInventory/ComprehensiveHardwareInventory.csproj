@@ -97,6 +97,7 @@
     <Compile Include="AutoCompleteEntry.cs" />
     <Compile Include="MyAutoCompleteTextBox.xaml.cs" />
     <Compile Include="MyExtensions.cs" />
+    <Compile Include="MyFileSystemWatcher.cs" />
     <Compile Include="NPOIHelper.cs" />
     <Compile Include="Tools.cs" />
     <Compile Include="ExcelHelper.cs" />
@@ -127,7 +128,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Resource Include="Files\AutoWordsList.txt" />
+    <Resource Include="Files\ParameterWordsList.txt" />
+    <Resource Include="Files\LogicWordsList.txt" />
+    <Resource Include="Files\ModulesList.txt" />
     <Content Include="Files\TemplateConfig.xml">
       <SubType>Designer</SubType>
     </Content>

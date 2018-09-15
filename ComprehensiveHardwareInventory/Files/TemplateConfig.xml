@@ -1440,12 +1440,12 @@
               <Property Name="AIDefinitions">
                 <AnaInCell>
                   <Index>8</Index>
-                  <Name>HelloWorldTemperature</Name>
-                  <Unit>C</Unit>
+                  <Name>CHEM1 Tank High Sensor</Name>
+                  <Unit>40L/Min</Unit>
                   <PhysicalMin>0</PhysicalMin>
-                  <PhysicalMax>1000</PhysicalMax>
-                  <LogicalMin>0</LogicalMin>
-                  <LogicalMax>100</LogicalMax>
+                  <PhysicalMax>32767</PhysicalMax>
+                  <LogicalMin>4</LogicalMin>
+                  <LogicalMax>40/</LogicalMax>
                   <LogicOffset>0</LogicOffset>
                 </AnaInCell>
                 <AnaInCell>

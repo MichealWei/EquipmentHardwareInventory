@@ -26,24 +26,27 @@ namespace ComprehensiveHardwareInventory
         #region fields
         private string currentfile;
         private ListCollectionView view;
-        private static string CurrentProgramPath = System.Environment.CurrentDirectory.Replace("\\bin\\Debug", "\\");
-        private string Configfilename = CurrentProgramPath + "Files\\TemplateConfig.xml";
-        private string AutoWordsFile = CurrentProgramPath + "Files\\AutoWordsList.txt";
+        private static string ProjectFilePath = System.Environment.CurrentDirectory.Replace("\\bin\\Debug", "\\") + "Files\\";
+        private string Configfilename = ProjectFilePath + "TemplateConfig.xml";
+        private string ParameterWordsFile = ProjectFilePath + "ParameterWordsList.txt"; 
+        private string LogicWordsFile = ProjectFilePath + "LogicWordsList.txt";
+        private string ModuleWordsFile = ProjectFilePath + "ModulesList.txt";
         private ObservableCollection<ItemRow> TableRowsList = new ObservableCollection<ItemRow>();
         private bool IsExcelLoaded = false;
-        private string user = CurrentProgramPath.Split('\\')[2];
+        private string user = ProjectFilePath.Split('\\')[2];
         private string currentIOView = String.Empty;
+        //private string currentModuleView = String.Empty;
         private static DataTable dt = new DataTable();
         private static DataTable currentDt = dt.Clone();
         private string currentCellOldValue = String.Empty;
-        private List<string> ChannelsListStrings = new List<string> { "ax", "ay", "dx", "dy" };
-        private List<string> ModulesListStrings = new List<string> { "System", "A", "A1", "A2", "A3", "A4", "B", "B1", "B2", "B3", "B4", "C", "C1", "C2", "C3", "C4", "D", "D1", "D2", "D3", "D4", "E", "E1", "E2", "F", "F1", "F2", "G", "G1", "G2" };
+        private List<string> ChannelsListStrings = new List<string> { "AX", "AY", "DX", "DY" };
+        private List<string> ModulesListStrings = new List<string> { "System", "A", "B", "C", "D", "E", "F", "G"};
         private List<string> ParametersListStrings = new List<string> { "CHEM1 Temperature Reading", "FlowReading", "PressureReading", "Yellow", "Green","Blue", "Enable", "UpValve", "OnOffValve", "DownValve", "DryValve", "OutValve", "SupplyValve", "TankToChamberValve", "Valve", "DSP Tank H2O2 In Flow Reading", "VMS Tank Supply Pump Speed Reading",
                                                                         "ReclaimToTankValve", "ExchangerPCWOutValve", "PumpOnOffValve", " FeedbackValve", "FinishAudiableSignal", "StartAudiableSignal", "Signal", "Sensor", "Anneal1 Heater Temperature Reading", "H2SO4 Tank DIW In Flow Reading", "CHEM1 Tank High Sensor", "N2 Protect Bearing Pressure Sensor",  "Wafer Pick Up Position Sensor", "Frame Door Sensor Chamber A1 Backside NO", "Frame Door Sensor Chamber A2 Rightside NO",
                                                                         "H2 MFC Inlet Pressure Reading", "CHEM2", "H2", "CO2", "N2 Line1 MFC Reading", "H2SO4 Supply Levitronix Pump Speed Reading", "DIW", "CDIW Pressure Reading", "DSP", "Heater", "LightTower", "ChamberLight", "FrameLight", "MotorInterlock", "EFEM Interlock And Enable Feedback", "EnvironmentExhaust", "H2O2Mixer",
                                                                         "OuterShroud", "MiddleShroud", "InnerShroud", "Loadport", "MainVacuum", "EFEMIonbarRemotePower", "FacilityCDIW", "", "N2ProtectBearingPCW", "N2PickupPin", "CassetteLot", "Interlock", "MotorInterlock", "Vacuum Pump Interlock And Enable Feedback",
                                                                         "Door", "Pressure", "Leak", "Level", "DSP Cabinet Exhaust Pressure Sensor#1", "DSP Cabinet Leak#1", "Module C Interlock Status", "Module C Door Status", "Heartbeat Interlock Feedback","Process Robot Interlock Interlock And Enable FeedBack"};
-        private List<string> LogicsListStrings = new List<string> { "4-20mA : 0-32767 : 4-40L/Min", "4-20mA : 0-32767 : 0-60PSI", "4-20mA : 0-32767 : 0-10LPM", "4-20mA : 0-32767 : 0-124.5Pa", "4-20mA : 0-32767 : 0-500Pa", "1-5V : 0-32767 : 10-100LPM", "4-20mA : 0-32767 : 0-0.8Mpa", "4~20MA : 0-32767 : 0.2-1.0MΩ·CM", "4~20mA : 0-32767 : -15~150PSI",
+        private List<string> LogicsListStrings = new List<string> {  "4-20mA : 0-32767 : 0-10LPM", "4-20mA : 0-32767 : 0-124.5Pa", "4-20mA : 0-32767 : 0-500Pa", "1-5V : 0-32767 : 10-100LPM", "4-20mA : 0-32767 : 0-0.8Mpa", "4~20MA : 0-32767 : 0.2-1.0MΩ·CM", "4~20mA : 0-32767 : -15~150PSI",
                                                                      "0~5V : 0-32767 : 0-10000RPM", "4~20mA : 0-32767 : 0~4.0L/Min ", "4~20mA : 0-32767 : 0.0~ -101.3KPa", "open:1", "close:1", "interlock:0", "interlock:1", "leak:0", "leak:1", "on:1", "off:1", "alarm:0", "alarm:1",
                                                                      "level achieved : 0", "level achieved : 1", "overfilled : 0", "overfilled : 1", "normal : 1", "normal : 0", "Up Pos : 1", "Dw Pos : 1", "enalbe:1", "request:1", "ready:1" };
 
@@ -60,25 +63,19 @@ namespace ComprehensiveHardwareInventory
         {
             InitializeComponent();
 
-            doc = XElement.Load(Configfilename);
-            ToolControl = doc.FindFirstElement("ToolControl");
-            List<string> ModulesName = new List<string>();
-            string ModuleName = String.Empty;
+            ReadXMLConfig();
+            PrepareTables();
 
-            foreach (var module in ToolControl.Elements())
-            {
-                ModuleName = module.Attribute("Name").Value;
-                ModulesName.Add(ModuleName);
-                XElement IODefinitionNode = module.FindFirstElement("Property", "AIDefinitions");
-                HierarchyDic.Add((ModuleName + "ax").ToLower(), IODefinitionNode);     // e.g. <systemax,XElement("System/AIDefinitions")>.
-                IODefinitionNode = module.FindFirstElement("Property", "AODefinitions");
-                HierarchyDic.Add((ModuleName + "ay").ToLower(), IODefinitionNode);
-                IODefinitionNode = module.FindFirstElement("Property", "DIDefinitions");
-                HierarchyDic.Add((ModuleName + "dx").ToLower(), IODefinitionNode);
-                IODefinitionNode = module.FindFirstElement("Property", "DODefinitions");
-                HierarchyDic.Add((ModuleName + "dy").ToLower(), IODefinitionNode);
-            }
+            ReadInAutoWordsList(ParameterWordsFile);        // Auto words file watcher process
+            ReadInAutoWordsList(LogicWordsFile);
+            ReadInAutoWordsList(ModuleWordsFile);
+            MyFileSystemWatcher FileWatcher = new MyFileSystemWatcher(ProjectFilePath, "*.txt");
+            FileWatcher.OnChanged += new FileSystemEventHandler(OnFileChanged);
+            FileWatcher.Start();
+        }
 
+        private void PrepareTables()
+        {
             dt.Columns.Add("Channel", typeof(string));
             dt.Columns.Add("Module", typeof(string));
             //dt.Columns.Add("Component", typeof(string));
@@ -103,10 +100,36 @@ namespace ComprehensiveHardwareInventory
             ParametersTable.RowEditEnding += dataGrid_RowEditEnding;
             ParametersTable.PreparingCellForEdit += dataGrid_PreparingCellForEdit;
             ParametersTable.CurrentCellChanged += dataGrid_CurrentCellChanging;
-
-            ReadInAutoWordsList();
         }
 
+        private void ReadXMLConfig()
+        {
+            if (File.Exists(Configfilename))
+            {
+                doc = XElement.Load(Configfilename);
+                ToolControl = doc.FindFirstElement("ToolControl");
+                List<string> ModulesName = new List<string>();
+                string ModuleName = String.Empty;
+
+                foreach (var module in ToolControl.Elements())
+                {
+                    ModuleName = module.Attribute("Name").Value;
+                    ModulesName.Add(ModuleName);
+                    XElement IODefinitionNode = module.FindFirstElement("Property", "AIDefinitions");
+                    HierarchyDic.Add((ModuleName + "ax").ToLower(), IODefinitionNode);     // e.g. <systemax,XElement("System/AIDefinitions")>.
+                    IODefinitionNode = module.FindFirstElement("Property", "AODefinitions");
+                    HierarchyDic.Add((ModuleName + "ay").ToLower(), IODefinitionNode);
+                    IODefinitionNode = module.FindFirstElement("Property", "DIDefinitions");
+                    HierarchyDic.Add((ModuleName + "dx").ToLower(), IODefinitionNode);
+                    IODefinitionNode = module.FindFirstElement("Property", "DODefinitions");
+                    HierarchyDic.Add((ModuleName + "dy").ToLower(), IODefinitionNode);
+                }
+            }
+        }
+        private void OnFileChanged(object source, FileSystemEventArgs e)      // update list if file has been changed.
+        {
+            ReadInAutoWordsList(e.FullPath);
+        }
 
         private void dataGrid_CurrentCellChanging(object sender, EventArgs e)
         {
@@ -168,14 +191,52 @@ namespace ComprehensiveHardwareInventory
             }
         }
 
-        private void ReadInAutoWordsList()
+        private void ReadInAutoWordsList(string filename)
         {
-            StreamReader sr = new StreamReader(AutoWordsFile);
             string line;
-            while ((line = sr.ReadLine()) != null)
+            StreamReader sr = new StreamReader(filename);
+            switch (filename.Split('\\').Last())
             {
-                if(!String.IsNullOrEmpty(line))
-                    ParametersListStrings.Add(textInfo.ToTitleCase(line.Trim()));
+                case "ParameterWordsList.txt":
+                    {
+                        while ((line = sr.ReadLine()) != null)
+                        {
+                            if (!String.IsNullOrEmpty(line)){
+                                string s = textInfo.ToTitleCase(line.Trim());
+                                if (!ParametersListStrings.Contains(s))
+                                    ParametersListStrings.Add(s);
+                            }
+
+                        }
+                    }
+                    break;
+                case "LogicWordsList.txt":
+                    {
+                        while ((line = sr.ReadLine()) != null)
+                        {
+                            if (!String.IsNullOrEmpty(line)){
+                                string s = textInfo.ToTitleCase(line.Trim());
+                                if (!LogicsListStrings.Contains(s))
+                                    LogicsListStrings.Add(s);
+                            }
+
+                        }
+                    }
+                    break;
+                case "ModulesList.txt":
+                    {
+                        while ((line = sr.ReadLine()) != null)
+                        {
+                            if (!String.IsNullOrEmpty(line))
+                            {
+                                string s = textInfo.ToTitleCase(line.Trim());
+                                if (!ModulesListStrings.Contains(s))
+                                    ModulesListStrings.Add(s);
+                            }
+
+                        }
+                    }
+                    break;
             }
         }
 
@@ -295,6 +356,24 @@ namespace ComprehensiveHardwareInventory
 
         }
 
+        private void OnClickModuleType(object sender, RoutedEventArgs e)
+        {
+            ConvertToDataTable(TableRowsList);
+            TableRowsList = ConvertToStringList(dt);
+            ParametersTable.ItemsSource = null;
+            ParametersTable.ItemsSource = TableRowsList;
+            view = (ListCollectionView)CollectionViewSource.GetDefaultView(ParametersTable.ItemsSource);
+            view.SortDescriptions.Add(new SortDescription("Channel", ListSortDirection.Ascending));
+            ModuleTypeGrouper grouper = new ModuleTypeGrouper();
+            view.GroupDescriptions.Add(new PropertyGroupDescription("Module", grouper));
+
+            //currentModuleView = (sender as MenuItem).Header.ToString();
+            //ParametersTable.ItemsSource = null;
+            //ParametersTable.ItemsSource = TableRowsList;
+            //ListCollectionView view1 = (ListCollectionView)CollectionViewSource.GetDefaultView(ParametersTable.ItemsSource);
+            ////view1.SortDescriptions.Add(new SortDescription("Channel", ListSortDirection.Ascending));
+            //view1.Filter = new Predicate<object>(item => ((ItemRow)item).Module.ToUpper().Contains(currentIOView));
+        }
 
         private void OnClickIOType(object sender, RoutedEventArgs e)
         {
@@ -305,7 +384,7 @@ namespace ComprehensiveHardwareInventory
             //view1.SortDescriptions.Add(new SortDescription("Channel", ListSortDirection.Ascending));
             view1.Filter = new Predicate<object>(item => ((ItemRow)item).Channel.ToUpper().Contains(currentIOView));
         }
-
+        
         private void OnClickDeleteRow(object sender, RoutedEventArgs e)
         {
             if (ParametersTable.SelectedItem != null && ParametersTable.SelectedItem != CollectionView.NewItemPlaceholder)
@@ -778,7 +857,18 @@ namespace ComprehensiveHardwareInventory
         {
             //FileStream fs = new FileStream(AutoWordsFile, FileMode.Append);
             //string filename = Tools.SaveExcelFileDialog();
-            System.Diagnostics.Process.Start("notepad.exe", AutoWordsFile);
+            string header = (sender as MenuItem).Header.ToString().Substring(3).TrimEnd('W','o','r','d','s');
+            string file = ParameterWordsFile;     // open ParameterWordsFile by default
+            switch (header)
+            {
+                case "Logic":
+                    file = LogicWordsFile;
+                    break;
+                case "Module":
+                    file = ModuleWordsFile;
+                    break;
+            }
+           System.Diagnostics.Process.Start("notepad.exe", file);
         }
     }
 
@@ -840,6 +930,31 @@ namespace ComprehensiveHardwareInventory
                                 return String.Format(culture, s2);
                         }
                     }
+                }
+                return "Error";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException("This converter is for grouping only");
+        }
+    }
+
+    public class ModuleTypeGrouper : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+            else
+            {
+                string s = value.ToString();
+                if (!String.IsNullOrEmpty(s))
+                {
+                   return String.Format(culture, s);
                 }
                 return "Error";
             }
