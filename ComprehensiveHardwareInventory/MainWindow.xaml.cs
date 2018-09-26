@@ -40,14 +40,15 @@ namespace ComprehensiveHardwareInventory
         private static DataTable currentDt = dt.Clone();
         private string currentCellOldValue = String.Empty;
         private List<string> ChannelsListStrings = new List<string> { "AX", "AY", "DX", "DY" };
+        private List<string> PhysicalLogicsListStrings = new List<string> { "0-16383", "0-32767"};
         private List<string> ModulesListStrings = new List<string> { "System", "A", "B", "C", "D", "E", "F", "G"};
         private List<string> ParametersListStrings = new List<string> { "CHEM1 Temperature Reading", "FlowReading", "PressureReading", "Yellow", "Green","Blue", "Enable", "UpValve", "OnOffValve", "DownValve", "DryValve", "OutValve", "SupplyValve", "TankToChamberValve", "Valve", "DSP Tank H2O2 In Flow Reading", "VMS Tank Supply Pump Speed Reading",
                                                                         "ReclaimToTankValve", "ExchangerPCWOutValve", "PumpOnOffValve", " FeedbackValve", "FinishAudiableSignal", "StartAudiableSignal", "Signal", "Sensor", "Anneal1 Heater Temperature Reading", "H2SO4 Tank DIW In Flow Reading", "CHEM1 Tank High Sensor", "N2 Protect Bearing Pressure Sensor",  "Wafer Pick Up Position Sensor", "Frame Door Sensor Chamber A1 Backside NO", "Frame Door Sensor Chamber A2 Rightside NO",
                                                                         "H2 MFC Inlet Pressure Reading", "CHEM2", "H2", "CO2", "N2 Line1 MFC Reading", "H2SO4 Supply Levitronix Pump Speed Reading", "DIW", "CDIW Pressure Reading", "DSP", "Heater", "LightTower", "ChamberLight", "FrameLight", "MotorInterlock", "EFEM Interlock And Enable Feedback", "EnvironmentExhaust", "H2O2Mixer",
                                                                         "OuterShroud", "MiddleShroud", "InnerShroud", "Loadport", "MainVacuum", "EFEMIonbarRemotePower", "FacilityCDIW", "", "N2ProtectBearingPCW", "N2PickupPin", "CassetteLot", "Interlock", "MotorInterlock", "Vacuum Pump Interlock And Enable Feedback",
                                                                         "Door", "Pressure", "Leak", "Level", "DSP Cabinet Exhaust Pressure Sensor#1", "DSP Cabinet Leak#1", "Module C Interlock Status", "Module C Door Status", "Heartbeat Interlock Feedback","Process Robot Interlock Interlock And Enable FeedBack"};
-        private List<string> LogicsListStrings = new List<string> {  "4-20mA : 0-32767 : 0-10LPM", "4-20mA : 0-32767 : 0-124.5Pa", "4-20mA : 0-32767 : 0-500Pa", "1-5V : 0-32767 : 10-100LPM", "4-20mA : 0-32767 : 0-0.8Mpa", "4~20MA : 0-32767 : 0.2-1.0MΩ·CM", "4~20mA : 0-32767 : -15~150PSI",
-                                                                     "0~5V : 0-32767 : 0-10000RPM", "4~20mA : 0-32767 : 0~4.0L/Min ", "4~20mA : 0-32767 : 0.0~ -101.3KPa", "open:1", "close:1", "interlock:0", "interlock:1", "leak:0", "leak:1", "on:1", "off:1", "alarm:0", "alarm:1",
+        private List<string> LogicsListStrings = new List<string> {  "4-20mA : 0-10LPM", "4-20mA : 0-124.5Pa", "4-20mA : 0-500Pa", "1-5V : 10-100LPM", "4-20mA : 0-0.8Mpa", "4~20MA : 0.2-1.0MΩ·CM", "4~20mA : -15~150PSI",
+                                                                     "0~5V : 0-10000RPM", "4~20mA : 0~4.0L/Min ", "4~20mA : 0.0~ -101.3KPa", "open:1", "close:1", "interlock:0", "interlock:1", "leak:0", "leak:1", "on:1", "off:1", "alarm:0", "alarm:1",
                                                                      "level achieved : 0", "level achieved : 1", "overfilled : 0", "overfilled : 1", "normal : 1", "normal : 0", "Up Pos : 1", "Dw Pos : 1", "enalbe:1", "request:1", "ready:1" };
 
         XElement ToolControl = null;
@@ -83,6 +84,7 @@ namespace ComprehensiveHardwareInventory
             dt.Columns.Add("Anonym", typeof(string));
             dt.Columns.Add("PhysicalAddress", typeof(string));
             dt.Columns.Add("Logic", typeof(string));
+            dt.Columns.Add("PhysicalLogic", typeof(string));
             dt.Columns.Add("DateAdded", typeof(string));
             dt.Columns.Add("Tag", typeof(string));
             dt.Columns.Add("Comment", typeof(string));
@@ -140,7 +142,7 @@ namespace ComprehensiveHardwareInventory
                 {
                     DataGridRow dataGridRow = ParametersTable.ItemContainerGenerator.ContainerFromIndex(i) as DataGridRow;
                     if (dataGridRow != null)
-                        (ParametersTable.Columns[6].GetCellContent(dataGridRow) as TextBlock).Text = user + " " + DateTime.Now.ToString();
+                        (ParametersTable.Columns[7].GetCellContent(dataGridRow) as TextBlock).Text = user + " " + DateTime.Now.ToString();
                 }
             }
         }
@@ -183,6 +185,12 @@ namespace ComprehensiveHardwareInventory
                             AutoCompleteBox ModulesAutoBox = editingTemplate.FindName("ModuleAutoCompleteBox", contentPresenter) as AutoCompleteBox;
                             if (ModulesAutoBox != null)
                                 ModulesAutoBox.ItemsSource = ModulesListStrings;
+                            else
+                            {
+                                AutoCompleteBox PhysicalLogicsAutoBox = editingTemplate.FindName("PhysicalLogicAutoCompleteBox", contentPresenter) as AutoCompleteBox;
+                                if (PhysicalLogicsAutoBox != null)
+                                    PhysicalLogicsAutoBox.ItemsSource = PhysicalLogicsListStrings;
+                            }
                         }
 
                     }
@@ -413,6 +421,7 @@ namespace ComprehensiveHardwareInventory
             currentfile = Tools.OpenExcelFileDialog();
             if (currentfile != null && currentfile.Length > 0)
             {
+                Tuple<string, DataTable> sheets = NPOIHelper.ImportSheetsToDataTable(currentfile, true);
                 dt = NPOIHelper.ImportExcelToDataTable(currentfile, true).Item2;
                 //TableRowsList.Clear();
                 TableRowsList = ConvertToStringList(dt);
@@ -657,9 +666,10 @@ namespace ComprehensiveHardwareInventory
                     {
                         foreach (var item in IOListNode.Elements())
                         {
-                            if (item.Element("Index").Value == NewIONode.Element("Index").Value && item.Element("Name").Value != NewIONode.Element("Name").Value)
+                            if (item.Element("Index").Value == NewIONode.Element("Index").Value)
                             {
-                                item.ReplaceAll(NewIONode.Elements());
+                                if(item.Element("Name").Value != NewIONode.Element("Name").Value)
+                                    item.ReplaceAll(NewIONode.Elements());
                                 break;
                             }
                             else if (int.Parse(item.Element("Index").Value) > int.Parse(NewIONode.Element("Index").Value))
@@ -815,7 +825,7 @@ namespace ComprehensiveHardwareInventory
             string s = String.Empty;
             foreach (DataRow row in table.Rows)
             {
-                ItemRow itemrow = new ItemRow(row.ItemArray[0].ToString(), row.ItemArray[1].ToString(), row.ItemArray[2].ToString(), row.ItemArray[3].ToString(), row.ItemArray[4].ToString(), row.ItemArray[5].ToString(), row.ItemArray[6].ToString(), row.ItemArray[7].ToString(), row.ItemArray[8].ToString());
+                ItemRow itemrow = new ItemRow(row.ItemArray[0].ToString(), row.ItemArray[1].ToString(), row.ItemArray[2].ToString(), row.ItemArray[3].ToString(), row.ItemArray[4].ToString(), row.ItemArray[5].ToString(), row.ItemArray[6].ToString(), row.ItemArray[7].ToString(), row.ItemArray[8].ToString(), row.ItemArray[9].ToString());
 
                 result.Add(itemrow);
             }
@@ -839,10 +849,11 @@ namespace ComprehensiveHardwareInventory
                     dtrow[0] = row.Channel;
                     dtrow[1] = row.Module;
                     //dtrow[2] = row.Component;
-                    dtrow[3] = row.Parameter;
-                    dtrow[4] = row.Anonym;
-                    dtrow[5] = row.PhysicalAddress;
-                    dtrow[6] = row.Logic;
+                    dtrow[2] = row.Parameter;
+                    dtrow[3] = row.Anonym;
+                    dtrow[4] = row.PhysicalAddress;
+                    dtrow[5] = row.Logic;
+                    dtrow[6] = row.PhysicalLogic;
                     dtrow[7] = row.DateAdded;
                     dtrow[8] = row.Tag;
                     dtrow[9] = row.Comment;
@@ -851,6 +862,7 @@ namespace ComprehensiveHardwareInventory
             }
 
             return dt;
+
         }
 
         private void OnClickAddAutoWords(object sender, RoutedEventArgs e)
@@ -878,13 +890,15 @@ namespace ComprehensiveHardwareInventory
         public string Module { get; set; }
         //public string Component { get; set; }
         public string Parameter { get; set; }
+        
         public string Anonym { get; set; }
         public string PhysicalAddress { get; set; }
         public string Logic { get; set; }
+        public string PhysicalLogic { get; set; }
         public string DateAdded { get; set; }
         public string Tag { get; set; }
         public string Comment { get; set; }
-        public ItemRow(string channel, string module, string parameter, string anonym, string physicaladdress, string logic, string dateadded, string tag, string comment)
+        public ItemRow(string channel, string module, string parameter, string anonym, string physicaladdress, string logic, string physicallogic, string dateadded, string tag, string comment)
         {
             Channel = channel;
             Module = module;
@@ -893,6 +907,7 @@ namespace ComprehensiveHardwareInventory
             Anonym = anonym;
             PhysicalAddress = physicaladdress;
             Logic = logic;
+            PhysicalLogic = physicallogic;
             DateAdded = dateadded;
             Tag = tag;
             Comment = comment;
@@ -900,7 +915,7 @@ namespace ComprehensiveHardwareInventory
         public ItemRow() { }
         public List<string> ToList()
         {
-            List<string> result = new List<string> { Channel ?? "", Module ?? "", Parameter ?? "", Anonym ?? "", PhysicalAddress ?? "", Logic ?? "", DateAdded ?? "", Tag ?? "", Channel ?? "" };
+            List<string> result = new List<string> { Channel ?? "", Module ?? "", Parameter ?? "", Anonym ?? "", PhysicalAddress ?? "", Logic ?? "", PhysicalLogic ?? "", DateAdded ?? "", Tag ?? "", Channel ?? "" };
             return result;
         }
     }

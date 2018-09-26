@@ -208,6 +208,19 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="PhysicalLogic" x:Name="PhysicalLogicAutoCol">
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate >
+                            <local:AutoCompleteFocusableBox IsTextCompletionEnabled="True" FilterMode="StartsWith" ItemsSource="{Binding}" x:Name="PhysicalLogicAutoCompleteBox" Width="Auto" Text="{Binding PhysicalLogic, Mode=TwoWay}" >
+                            </local:AutoCompleteFocusableBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding PhysicalLogic, Mode=TwoWay}"></TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
                 <DataGridTextColumn Header="Date Added" Binding="{Binding DateAdded, Mode=TwoWay}" />
                 <DataGridTextColumn Header="Tag" Binding="{Binding Tag, Mode=TwoWay}" />

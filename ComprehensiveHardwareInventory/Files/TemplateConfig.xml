@@ -1440,32 +1440,32 @@
               <Property Name="AIDefinitions">
                 <AnaInCell>
                   <Index>8</Index>
-                  <Name>CHEM1 Tank High Sensor</Name>
-                  <Unit>40L/Min</Unit>
+                  <Name>CHEM1 Temperature Reading</Name>
+                  <Unit>LPM</Unit>
                   <PhysicalMin>0</PhysicalMin>
                   <PhysicalMax>32767</PhysicalMax>
-                  <LogicalMin>4</LogicalMin>
-                  <LogicalMax>40/</LogicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>10</LogicalMax>
                   <LogicOffset>0</LogicOffset>
                 </AnaInCell>
                 <AnaInCell>
                   <Index>9</Index>
-                  <Name>Tank1TemperatureReading</Name>
-                  <Unit>C</Unit>
+                  <Name>Afeewf</Name>
+                  <Unit>Pa</Unit>
                   <PhysicalMin>0</PhysicalMin>
-                  <PhysicalMax>1000</PhysicalMax>
+                  <PhysicalMax>32767</PhysicalMax>
                   <LogicalMin>0</LogicalMin>
-                  <LogicalMax>100</LogicalMax>
+                  <LogicalMax>124.5</LogicalMax>
                   <LogicOffset>0</LogicOffset>
                 </AnaInCell>
                 <AnaInCell>
                   <Index>10</Index>
-                  <Name>Tank2TemperatureReading</Name>
-                  <Unit>C</Unit>
+                  <Name>DSP Tank H2O2 In Flow Reading</Name>
+                  <Unit>PSI</Unit>
                   <PhysicalMin>0</PhysicalMin>
-                  <PhysicalMax>1000</PhysicalMax>
-                  <LogicalMin>0</LogicalMin>
-                  <LogicalMax>100</LogicalMax>
+                  <PhysicalMax>32767</PhysicalMax>
+                  <LogicalMin></LogicalMin>
+                  <LogicalMax>15~150</LogicalMax>
                   <LogicOffset>0</LogicOffset>
                 </AnaInCell>
                 <AnaInCell>
@@ -1496,6 +1496,16 @@
                   <PhysicalMax>1000</PhysicalMax>
                   <LogicalMin>0</LogicalMin>
                   <LogicalMax>100</LogicalMax>
+                  <LogicOffset>0</LogicOffset>
+                </AnaInCell>
+                <AnaInCell>
+                  <Index>20</Index>
+                  <Name>PressureReading</Name>
+                  <Unit>Pa</Unit>
+                  <PhysicalMin>0</PhysicalMin>
+                  <PhysicalMax>32767</PhysicalMax>
+                  <LogicalMin>0</LogicalMin>
+                  <LogicalMax>124.5</LogicalMax>
                   <LogicOffset>0</LogicOffset>
                 </AnaInCell>
                 <AnaInCell>
