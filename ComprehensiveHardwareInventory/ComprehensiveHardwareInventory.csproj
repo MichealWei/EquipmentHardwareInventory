@@ -95,6 +95,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AutoCompleteEntry.cs" />
+    <Compile Include="MainClasses.cs" />
     <Compile Include="MyAutoCompleteTextBox.xaml.cs" />
     <Compile Include="MyExtensions.cs" />
     <Compile Include="MyFileSystemWatcher.cs" />
@@ -134,8 +135,8 @@
     <Content Include="Files\TemplateConfig.xml">
       <SubType>Designer</SubType>
     </Content>
-    <None Include="Files\057-2215 Ultra-C SJSEMI02 Wet Etch Machine EE IO List-P1.02.xls" />
-    <None Include="Files\ToolControl.Config" />
+    <None Include="Files\057-2181 ECP04-System Module IO List-P1.04.xls" />
+    <None Include="Files\ECP04.Config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

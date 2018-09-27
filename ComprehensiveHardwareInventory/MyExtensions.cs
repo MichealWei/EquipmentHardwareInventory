@@ -283,5 +283,14 @@ namespace ComprehensiveHardwareInventory
             return result;
         }
 
+        public static string ReplaceFirst(this string value, string oldValue, string newValue)
+        {
+            int idx = value.IndexOf(oldValue);
+            if (idx == -1)
+                return value;
+            value = value.Remove(idx, oldValue.Length);
+            return value.Insert(idx, newValue);
+
+        }
     }
 }

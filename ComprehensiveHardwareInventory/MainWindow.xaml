@@ -27,11 +27,13 @@
         <Menu Height="20">
             <MenuItem Header="File">
                 <Button Content="New" Click="OnClickNew"></Button>
+                <MenuItem Header="LoadRawExcel" Click="OnClickLoadRawExcel"></MenuItem>
                 <Separator></Separator>
                 <MenuItem Header="LoadExcel" Click="OnClickLoadExcel"></MenuItem>
                 <MenuItem Header="SaveToNewExcel" Click="OnClickSaveToNewExcel"></MenuItem>
                 <MenuItem Header="UpdateToExcel" Click="OnClickUpdateToExcel"></MenuItem>
                 <Separator></Separator>
+                <MenuItem Header="LoadConfig" Click="OnClickLoadConfig"></MenuItem>
                 <MenuItem Header="OverwriteConfig" Click="OnClickOverwriteConfig"></MenuItem>
                 <MenuItem Header="UpdateConfig" Click="OnClickUpdateConfig"></MenuItem>
                 <Separator></Separator>
