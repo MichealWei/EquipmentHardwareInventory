@@ -8,6 +8,7 @@ using System.IO;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
+using System.Windows;
 
 namespace ComprehensiveHardwareInventory
 {
@@ -134,6 +135,157 @@ namespace ComprehensiveHardwareInventory
             }
         }
 
+        /// <summary>  
+        /// 将excel sheets导入到datatable  
+        /// </summary>  
+        /// <param name="filePath">excel路径</param>  
+        /// <param name="isColumnName">第一行是否是列名</param>  
+        /// <returns>返回datatable</returns>  
+        public static List<DataTable> ImportSheetsToDataTable(string filePath, bool isColumnName)
+        {
+            DataTable dataTable = null;
+            FileStream fs = null;
+            DataColumn column = null;
+            DataRow dataRow = null;
+            IWorkbook workbook = null;
+            ISheet sheet = null;
+            IRow row = null;
+            ICell cell = null;
+            int startRow = 0;
+            List<DataTable> tables = new List<DataTable>();
+            try
+            {
+                using (fs = File.OpenRead(filePath))
+                {
+                    // 2007版本  
+                    if (filePath.IndexOf(".xlsx") > 0)
+                        workbook = new XSSFWorkbook(fs);
+                    // 2003版本  
+                    else if (filePath.IndexOf(".xls") > 0)
+                        workbook = new HSSFWorkbook(fs);
+
+                    if (workbook != null)
+                    {
+                        int AISheetIndex = workbook.GetSheetIndex("AI");
+                        int AOSheetIndex = workbook.GetSheetIndex("AO");
+                        int DISheetIndex = workbook.GetSheetIndex("DI");
+                        int DOSheetIndex = workbook.GetSheetIndex("DO");
+                        List<int> IOTypeIndex = new List<int> { AISheetIndex, AOSheetIndex, DISheetIndex, DOSheetIndex };
+                        foreach (var IO in IOTypeIndex)
+                        {
+                            sheet = workbook.GetSheetAt(IO);//读取第一个sheet，当然也可以循环读取每个sheet  
+                            dataTable = new DataTable();
+                            if (sheet != null)
+                            {
+                                int rowCount = sheet.LastRowNum;//总行数  
+                                if (rowCount > 0)
+                                {
+                                    int k = 0; // iterate to first non-null row
+                                    while (sheet.GetRow(k) == null)
+                                    {
+                                        k++;
+                                    }
+                                    while (true)
+                                    {
+                                        string s = sheet.GetRow(k).First().ToString();
+
+                                        if (s.ToUpper().Trim().StartsWith("AX") || s.ToUpper().Trim().StartsWith("AY") || s.ToUpper().Trim().StartsWith("DX") || s.ToUpper().Trim().StartsWith("DY"))
+                                        {
+                                            break;
+                                        }
+                                        k++;
+                                    }
+
+                                    IRow firstRow = sheet.GetRow(k - 1);//第一行  
+                                    int cellCount = firstRow.LastCellNum;//列数  
+
+                                    //构建datatable的列  
+                                    if (isColumnName)
+                                    {
+                                        for (int i = firstRow.FirstCellNum; i < cellCount; ++i)
+                                        {
+                                            cell = firstRow.GetCell(i);
+                                            if (cell != null)
+                                            {
+                                                if (cell.StringCellValue != null)
+                                                {
+                                                    column = new DataColumn(cell.StringCellValue);
+                                                    dataTable.Columns.Add(column);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        for (int i = firstRow.FirstCellNum; i < cellCount; ++i)
+                                        {
+                                            column = new DataColumn("column" + (i + 1));
+                                            dataTable.Columns.Add(column);
+                                        }
+                                    }
+                                    startRow = k;
+
+                                    //填充行  
+                                    for (int i = startRow; i <= rowCount; ++i)
+                                    {
+                                        row = sheet.GetRow(i);
+                                        if (row == null) continue;
+
+                                        if (row.FirstCellNum < 0)          // some rows are not in good form
+                                            continue;
+                                        dataRow = dataTable.NewRow();
+                                        for (int j = row.FirstCellNum; j < cellCount; ++j)
+                                        {
+                                            cell = row.GetCell(j);
+                                            if (cell == null)
+                                            {
+                                                dataRow[j] = "";
+                                            }
+                                            else
+                                            {
+                                                //CellType(Unknown = -1,Numeric = 0,String = 1,Formula = 2,Blank = 3,Boolean = 4,Error = 5,)  
+                                                switch (cell.CellType)
+                                                {
+                                                    case CellType.Blank:
+                                                        dataRow[j] = "";
+                                                        break;
+                                                    case CellType.Numeric:
+                                                        short format = cell.CellStyle.DataFormat;
+                                                        //对时间格式（2015.12.5、2015/12/5、2015-12-5等）的处理  
+                                                        if (format == 14 || format == 31 || format == 57 || format == 58)
+                                                            dataRow[j] = cell.DateCellValue;
+                                                        else
+                                                            dataRow[j] = cell.NumericCellValue;
+                                                        break;
+                                                    case CellType.String:
+                                                        dataRow[j] = cell.StringCellValue;
+                                                        break;
+                                                }
+                                            }
+                                        }
+                                        if (!String.IsNullOrEmpty(dataRow.ItemArray[1].ToString()))
+                                            dataTable.Rows.Add(dataRow);
+                                    }
+                                }
+                            }
+                            tables.Add(dataTable);
+                        }
+
+                    }
+                }
+                return tables;
+            }
+            catch (Exception ex)
+            {
+                if (fs != null)
+                {
+                    fs.Close();
+                }
+                MessageBox.Show(ex.Message + "\n\rWrong Format! Return null list");
+                return new List<DataTable>();
+            }
+        }
+
         public static Tuple<bool, string> ExportDataTableToExcel(DataTable dt, string saveTopath)
         {
             bool result = false;
@@ -154,13 +306,13 @@ namespace ComprehensiveHardwareInventory
 
                     //设置列头  
                     row = sheet.CreateRow(0);//excel第一行设为列头 
-                    //IFont font = workbook.CreateFont();
-                    //font.IsBold = true;
-                    //font.FontHeight = 18;
-                    //ICellStyle CellStyle = workbook.CreateCellStyle();
-                    //CellStyle.SetFont(font);
-                    //CellStyle.FillForegroundColor = IndexedColors.LightGreen.Index;
-                        //row.GetCell(c).CellStyle = CellStyle;
+                                             //IFont font = workbook.CreateFont();
+                                             //font.IsBold = true;
+                                             //font.FontHeight = 18;
+                                             //ICellStyle CellStyle = workbook.CreateCellStyle();
+                                             //CellStyle.SetFont(font);
+                                             //CellStyle.FillForegroundColor = IndexedColors.LightGreen.Index;
+                                             //row.GetCell(c).CellStyle = CellStyle;
                     for (int c = 0; c < columnCount; c++)
                     {
                         cell = row.CreateCell(c);
@@ -172,7 +324,7 @@ namespace ComprehensiveHardwareInventory
                     for (int i = 0; i < rowCount; i++)
                     {
                         row = sheet.CreateRow(i + 1);
-                       
+
                         for (int j = 0; j < columnCount; j++)
                         {
                             cell = row.CreateCell(j);//excel第二行开始写入数据  

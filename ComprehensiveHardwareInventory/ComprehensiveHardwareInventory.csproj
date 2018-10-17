@@ -95,6 +95,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AutoCompleteEntry.cs" />
+    <Compile Include="MainClasses.cs" />
     <Compile Include="MyAutoCompleteTextBox.xaml.cs" />
     <Compile Include="MyExtensions.cs" />
     <Compile Include="MyFileSystemWatcher.cs" />
@@ -128,14 +129,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Resource Include="Files\ParameterWordsList.txt" />
-    <Resource Include="Files\LogicWordsList.txt" />
-    <Resource Include="Files\ModulesList.txt" />
-    <Content Include="Files\TemplateConfig.xml">
-      <SubType>Designer</SubType>
-    </Content>
-    <None Include="Files\057-2215 Ultra-C SJSEMI02 Wet Etch Machine EE IO List-P1.02.xls" />
-    <None Include="Files\ToolControl.Config" />
+    <None Include="Files\IO List.xls" />
+    <None Include="Files\IOAutomationAppReadMe.docx" />
+    <None Include="Files\Project.Config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -144,6 +140,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Files\LogicWordsList.txt" />
+    <Resource Include="Files\ModulesList.txt" />
+    <Resource Include="Files\ParameterWordsList.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

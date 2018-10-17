@@ -27,11 +27,13 @@
         <Menu Height="20">
             <MenuItem Header="File">
                 <Button Content="New" Click="OnClickNew"></Button>
+                <MenuItem Header="LoadRawExcel" Click="OnClickLoadRawExcel"></MenuItem>
                 <Separator></Separator>
                 <MenuItem Header="LoadExcel" Click="OnClickLoadExcel"></MenuItem>
                 <MenuItem Header="SaveToNewExcel" Click="OnClickSaveToNewExcel"></MenuItem>
                 <MenuItem Header="UpdateToExcel" Click="OnClickUpdateToExcel"></MenuItem>
                 <Separator></Separator>
+                <MenuItem Header="LoadConfig" Click="OnClickLoadConfig"></MenuItem>
                 <MenuItem Header="OverwriteConfig" Click="OnClickOverwriteConfig"></MenuItem>
                 <MenuItem Header="UpdateConfig" Click="OnClickUpdateConfig"></MenuItem>
                 <Separator></Separator>
@@ -41,6 +43,8 @@
             </MenuItem>
             <MenuItem Header="Edit">
                 <MenuItem Header="DeleteRow : Ctrl-D" Command="{StaticResource ClickCommand}" />
+                <MenuItem Header="DeleteEmptyRows" Click="OnClickDeleteEmptyRows"/>
+                <MenuItem Header="NormalizeNames" Click="OnClickNormalizeNames"/>
                 <!--<MenuItem Header="Redo"></MenuItem>
                 <Separator></Separator>
                 <MenuItem Header="Cut"></MenuItem>
@@ -205,6 +209,19 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Logic, Mode=TwoWay}"></TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="PhysicalLogic" x:Name="PhysicalLogicAutoCol">
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate >
+                            <local:AutoCompleteFocusableBox IsTextCompletionEnabled="True" FilterMode="StartsWith" ItemsSource="{Binding}" x:Name="PhysicalLogicAutoCompleteBox" Width="Auto" Text="{Binding PhysicalLogic, Mode=TwoWay}" >
+                            </local:AutoCompleteFocusableBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding PhysicalLogic, Mode=TwoWay}"></TextBlock>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

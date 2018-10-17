@@ -181,7 +181,7 @@ namespace ComprehensiveHardwareInventory
         }
 
         #region private methods
-        
+
         #endregion
     }
 }

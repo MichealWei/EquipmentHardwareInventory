@@ -1,28 +1,9 @@
-SPM
-QDR
-PCH
-CCH
-PEM
-Plating Plumbing
-Plating Bath Module
-CDU
-CCHA
-CCHA1
-CCHA2
-CCHA3
-CCHA4
-CCHB
-CCHB1
-CCHB2
-CCHB3
-CCHB4
-CCHC
-CCHC1
-CCHC2
-CCHC3
-CCHC4
-CCHD
-CCHD1
-CCHD2
-CCHD3
-CCHD4
+System : System
+Anneal-1 : Anneal1
+Anneal-2 : Anneal2
+Anneal-3 : Anneal3
+Anneal-4 : Anneal4
+Anneal-5 : Anneal5
+Anneal-6 : Anneal6
+Anneal-7 : Anneal7
+Anneal-8 : Anneal8

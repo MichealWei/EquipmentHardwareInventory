@@ -45,6 +45,19 @@ namespace ComprehensiveHardwareInventory
                 return null;
             return ofd.FileName;
         }
+
+        public static string OpenFileDialog()
+        {
+            var ofd = new Microsoft.Win32.OpenFileDialog()
+            {
+                Filter = "All files(*.*)|*.*",
+                FilterIndex = 1
+            };
+
+            if (ofd.ShowDialog() != true)
+                return null;
+            return ofd.FileName;
+        }
         #endregion
         #region 读excel
         public static DataTable ImportExcelFile()
