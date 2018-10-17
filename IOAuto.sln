@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComprehensiveHardwareInventory", "ComprehensiveHardwareInventory\ComprehensiveHardwareInventory.csproj", "{026152F5-3B9D-41AB-9B99-2C916C21E9E7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IOListConfigAuto", "ComprehensiveHardwareInventory\IOListConfigAuto.csproj", "{026152F5-3B9D-41AB-9B99-2C916C21E9E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
